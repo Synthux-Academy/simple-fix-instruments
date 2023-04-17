@@ -1,41 +1,44 @@
+/// Derived from https://github.com/electro-smith/DaisyDuino/blob/master/examples/Seed/string/string.ino
+
 #include "DaisyDuino.h"
 
 #include <algorithm>
 
 static DaisyHardware seed;
-
-// Helper Modules
-static Metro tick;
 static StringOsc str;
-static Oscillator lfo;
 
-// MIDI note numbers for a major triad
-const float kArpeggio[3] = {48.0f, 52.0f, 55.0f};
+#define C4 261.63f
+#define D4 293.66f
+#define E4 329.63f
+#define F4 349.23f
+#define G4 392.00f
+#define A4 440.00f
+#define B4 493.88f
+#define C5 523.25f
+
+const int kArpegioLength = 3;
+const float kArpeggio[kArpegioLength] = { C4, E4, G4 };
 uint8_t arp_idx;
 
+const float kTempo = 120;
+const float kSecondsPerMinute = 60;
+uint32_t trigger_interval;
+uint32_t trigger_countdown;
+
 static void AudioCallback(float **in, float **out, size_t size) {
+  uint8_t excite_string;
   for (size_t i = 0; i < size; i++) {
-    // When the Metro ticks:
-    // advance the kArpeggio, and trigger the String.
-    bool trig = tick.Process();
-    if (trig) {
-      // convert midi nn to frequency.
-      float freq = mtof(kArpeggio[arp_idx]);
-
-      // advance the kArpeggio, wrapping at the end.
-      arp_idx = (arp_idx + 1) % 3;
-      str.SetFreq(freq);
+    excite_string = 0;
+    if (trigger_countdown == 0) {
+      excite_string = 1;
+      str.SetFreq(kArpeggio[arp_idx]);
+      
+      arp_idx = (arp_idx + 1) % kArpegioLength;
+      trigger_countdown = trigger_interval;
     }
-
-    // modulate the string parameters using the lfo
-    float sig = lfo.Process();
-
-    str.SetBrightness(fabsf(sig));
-    str.SetDamping(fabsf(sig) + .2f);
-    str.SetNonLinearity(sig);
-
-    // output the sample
-    out[0][i] = out[1][i] = str.Process(trig);
+    trigger_countdown --;
+    
+    out[0][i] = out[1][i] = str.Process(excite_string);
   }
 }
 
@@ -46,19 +49,14 @@ void setup() {
 
   sample_rate = DAISY.get_samplerate();
 
-  // Set up Metro to pulse every second
-  tick.Init(2.0f, sample_rate);
+  float samples_per_beat = kSecondsPerMinute * sample_rate / kTempo;
+  trigger_interval = samples_per_beat / 2; // 1/8th
 
   // Set up String algo
   str.Init(sample_rate);
   str.SetDamping(.8f);
   str.SetNonLinearity(.1f);
   str.SetBrightness(.5f);
-
-  // setup lfo at .25Hz
-  lfo.Init(sample_rate);
-  lfo.SetAmp(1.f);
-  lfo.SetFreq(.1f);
 
   arp_idx = 0;
 
