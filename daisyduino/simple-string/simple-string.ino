@@ -28,7 +28,6 @@ bool button_was_pushed = false;
 
 static void AudioCallback(float **in, float **out, size_t size) {
   uint8_t excite_string = 0;
-  
   // Take the button state
   bool button_is_pushed = digitalRead(kButtonPin);
   // Check if the state of the button changed from
@@ -49,8 +48,11 @@ static void AudioCallback(float **in, float **out, size_t size) {
   // Iterate through the number of samples in the buffer...
   for (size_t i = 0; i < size; i++) {
     // ... and fill both left and right channels 
-    // of the output buffer with String Oscilator output
+    // of the output buffer with String Oscilator output...
     out[0][i] = out[1][i] = string.Process(excite_string);
+    // ... and reset the flag so the string gets excited 
+    // only on the first sample of the buffer
+    excite_string = 0;
   }
 }
 
