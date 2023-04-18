@@ -66,7 +66,10 @@ void setup() {
   string.SetBrightness(.5f);
 
   // Setup button
-  pinMode(kButtonPin, INPUT);
+  // In this case button is connected to
+  // Digital 3v3 (Pin 38), so we need
+  // to pull pin down
+  pinMode(kButtonPin, INPUT_PULLDOWN);
 
   // Start Audio Callback
   DAISY.begin(AudioCallback);
