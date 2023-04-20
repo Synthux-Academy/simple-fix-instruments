@@ -2,8 +2,6 @@
 
 #include "DaisyDuino.h"
 
-#include <algorithm>
-
 static DaisyHardware seed;
 static StringOsc string;
 
