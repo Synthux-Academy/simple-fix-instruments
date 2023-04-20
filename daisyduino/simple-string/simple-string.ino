@@ -21,30 +21,20 @@ static StringOsc string;
 // Define note sequence
 const int kNotesCount = 3;
 const float kNotes[kNotesCount] = { C4, E4, G4 };
-uint8_t next_note_index = 0;
+int next_note_index = 0;
 
+// Define button pin and state
 const int kButtonPin = 2;
+bool button_is_pushed = false;
 bool button_was_pushed = false;
 
-static void AudioCallback(float **in, float **out, size_t size) {
-  uint8_t excite_string = 0;
-  // Take the button state
-  bool button_is_pushed = digitalRead(kButtonPin);
-  // Check if the state of the button changed from
-  // released to pushed, and if yes...
-  if (button_is_pushed && !button_was_pushed) {
-    //...then we excite the string...
-    excite_string = 1;
-    //...and play the next note.
-    string.SetFreq(kNotes[next_note_index]);
-   // Then move to the next note. If the note we 
-   // just played was the last in the sequence,
-   // we jump to the first one with "% kNotesCount"
-    next_note_index = (next_note_index + 1) % kNotesCount;
-  }
-  // Save the button state for the next iteration 
-  button_was_pushed = button_is_pushed;
+// A flag inidcating of whether the 
+// string should be excited. We set
+// it to 1 on button push and rest to 0
+// after first buffer sample in Audio Callback 
+float excite_string = 0;
 
+static void AudioCallback(float **in, float **out, size_t size) {
   // Iterate through the number of samples in the buffer...
   for (size_t i = 0; i < size; i++) {
     // ... and fill both left and right channels 
@@ -77,4 +67,28 @@ void setup() {
   DAISY.begin(AudioCallback);
 }
 
-void loop() {}
+void loop() {
+  // Take the button state
+  button_is_pushed = digitalRead(kButtonPin);
+  // Check if the state of the button changed from
+  // released to pushed, ...
+  if (button_is_pushed && !button_was_pushed) {
+    // if yes then we excite the string...
+    excite_string = 1;
+    //...and play the next note.
+    string.SetFreq(kNotes[next_note_index]);
+    // Then move to the next note.
+    next_note_index ++;
+    // If the note we just played was the last 
+    // in the sequence, we jump to the first one.
+    if (next_note_index == kNotesCount) {
+      next_note_index = 0;
+    }
+  }
+  // Save the button state for the next iteration 
+  button_was_pushed = button_is_pushed;
+  // Wait 1ms until next interation, so we
+  // are not quering the button too fast. It's
+  // kind of debounce.
+  delay(1);
+}
