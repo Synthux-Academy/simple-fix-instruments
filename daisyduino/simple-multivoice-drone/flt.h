@@ -10,7 +10,7 @@ public:
 
   void Read(int pin) {
     auto timbre = analogRead(pin) / 1023.0;
-    auto fltFreq = fmap(timbre, 60, 10000);
+    auto fltFreq = fmap(timbre, 60, 15000);
     auto fltRes = fmap(1 - timbre, 0, 0.5);
     _flt.SetFreq(fltFreq);
     _flt.SetRes(fltRes); 

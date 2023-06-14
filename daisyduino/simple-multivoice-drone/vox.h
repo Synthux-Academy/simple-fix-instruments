@@ -1,4 +1,3 @@
-#include <cstdlib>
 #pragma once
 
 #include "DaisyDuino.h"
@@ -21,20 +20,22 @@ void Init(float sampleRate, float oscHighestFreq) {
 }
 
 void Read(int oscPitchPin, int oscFreqPin) {
-  auto pitch = fmap(analogRead(oscPitchPin) / 1023.0, 0, 500); 
-  _oscFreq = fmap(analogRead(oscFreqPin) / 1023.0, kOscLowestFreq + pitch, _oscHighestFreq + pitch);
-  _lfo.SetAmp(0.005 * analogRead(oscFreqPin) / 1023.0);
+  auto oscFreqOffset = fmap(analogRead(oscPitchPin) / 1023.f, 0, 500);
+  auto oscFreqMin =  kOscLowestFreq + oscFreqOffset;
+  auto oscFreqMax = _oscHighestFreq + oscFreqOffset;
+  _oscFreq = fmap(analogRead(oscFreqPin) / 1023.f, oscFreqMin, oscFreqMax);
+  auto lfoAmp = fmap(analogRead(oscFreqPin) / 1023.f, 0.f, 0.005);
+  _lfo.SetAmp(lfoAmp);
 }
 
 float Process() {
-    _osc.SetFreq(_oscFreq * (1.0 + _lfo.Process()));
+    _osc.SetFreq(_oscFreq * (1.f + _lfo.Process()));
     return _osc.Process();
 }
 
 private:
   Oscillator _osc;
   Oscillator _lfo;
-
   float _oscFreq;
   float _oscHighestFreq;
 };
