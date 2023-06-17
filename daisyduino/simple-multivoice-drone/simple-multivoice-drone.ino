@@ -64,7 +64,7 @@ void setup() {
 
 void loop() {
   for (auto& vox: voxs) { vox.Read(S31, S32); }
-  flt.Read(S33);
+  flt.SetTimbre(analogRead(S33) / 1023.0);
   gate = digitalRead(S30);
   delay(4);
 }
