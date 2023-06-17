@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SYNTHUX_VOX_H
+#define SYNTHUX_VOX_H
 
 #include "DaisyDuino.h"
 
@@ -39,3 +40,5 @@ private:
   float _oscFreq;
   float _oscHighestFreq;
 };
+
+#endif

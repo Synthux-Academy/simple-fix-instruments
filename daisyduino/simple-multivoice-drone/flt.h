@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SYNTHUX_FLTR_H
+#define SYNTHUX_FLTR_H
 
 #include "DaisyDuino.h"
 
@@ -22,3 +23,5 @@ public:
 private:
   daisysp::MoogLadder _flt;
 };
+
+#endif
