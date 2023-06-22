@@ -28,8 +28,9 @@ class Looper {
     }
 
     void SetLoop(const float loop_start, const float loop_length) {
-      _loop_start = static_cast<long>(loop_start * (_buffer_length - 1));
-      _loop_length = max(static_cast<long>(192), static_cast<long>(loop_length * _buffer_length));
+      _next_loop_start = static_cast<long>(loop_start * (_buffer_length - 1));
+      if (_loop_start == -1) _loop_start = _next_loop_start;
+      _loop_length = max(static_cast<long>(480), static_cast<long>(loop_length * _buffer_length));
     }
 
     void SetPitch(const float loop_start_mod) {
@@ -50,15 +51,27 @@ class Looper {
         _rec_head ++;
       }
 
+      float att = 1;
       float output = 0;
       if (!_is_empty) {
         auto play_pos = (_loop_start + _play_head) % _buffer_length;
         output = _buffer[play_pos];
+
+        if (_play_head < 192) {
+          att = static_cast<float>(_play_head) / 192.f;
+        }
+        else if (_play_head >= _loop_length - 192) {
+          att = static_cast<float>(_loop_length - _play_head) / 192.f;
+        }
+
         _play_head ++;
-        _play_head %= _loop_length;
+        if (_play_head >= _loop_length) {
+          _loop_start = _next_loop_start;
+          _play_head = 0;
+        }
       }
       
-      return _pitch_on ? _pitch.Process(output) : output;
+      return (_pitch_on ? _pitch.Process(output) : output) * att;
     }
 
   private:
@@ -66,16 +79,17 @@ class Looper {
 
     float* _buffer;
     
-    long _buffer_length = 0;
-    long _loop_start    = 0;
-    long _loop_length   = 0;
-    
-    long _play_head     = 0;
-    long _rec_head      = 0;
+    long _buffer_length   = 0;
+    long _loop_start      = -1;
+    long _next_loop_start = 0;
+    long _loop_length     = 0;
 
-    bool _rec_on        = false;
-    bool _is_empty      = true;
-    bool _pitch_on      = false;
+    long _play_head       = 0;
+    long _rec_head        = 0;
+
+    bool _rec_on          = false;
+    bool _is_empty        = true;
+    bool _pitch_on        = false;
 };
 };
 
