@@ -80,7 +80,7 @@ class Looper {
   private:
     PitchShifter _pitch;
 
-    const long kFadeLength = 600;
+    const long kFadeLength = 300;
     const long kMinLoopLength = 2 * kFadeLength;
 
     float* _buffer;
