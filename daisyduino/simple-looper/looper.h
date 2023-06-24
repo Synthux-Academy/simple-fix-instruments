@@ -22,6 +22,10 @@ class Looper {
             _rec_head = (_loop_start + _play_head) % _buffer_length; 
             _is_empty = false;
         }
+        // When record switch changes state it effectively
+        // sets ramp to rising/falling, providing a
+        // fade in/out in the beginning and at the end of 
+        // the recorded region.
         _rec_ramp_pos_inc = is_rec_on ? 1 : -1;
     }
 
@@ -32,13 +36,14 @@ class Looper {
     }
   
     float Process(float in) {
-      // Record to the buffer
+      // Calculate iterator position on the ramp.
       if (_rec_ramp_pos_inc > 0 && _rec_ramp_pos < kFadeLength
        || _rec_ramp_pos_inc < 0 && _rec_ramp_pos > 0) {
           _rec_ramp_pos += _rec_ramp_pos_inc;
       }
-      
+      // If we're in the middle of the ramp - record to the buffer.
       if (_rec_ramp_pos > 0) {
+        // Calculate fade in/out
         float rec_attenuation = static_cast<float>(_rec_ramp_pos) / static_cast<float>(kFadeLength);
         auto rec_pos = _rec_head % _buffer_length;
         _buffer[rec_pos] = in * rec_attenuation + _buffer[rec_pos] * (1.f - rec_attenuation);
