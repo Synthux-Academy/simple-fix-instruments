@@ -18,10 +18,11 @@ class Looper {
 
     void SetRecording(bool is_rec_on) {
         //Initialize recording head position on start
-        if (!_rec_on && is_rec_on) {
+        if (_rec_ramp_pos_inc <= 0 && is_rec_on) {
             _rec_head = (_loop_start + _play_head) % _buffer_length; 
+            _is_empty = false;
         }
-        _rec_on = is_rec_on;
+        _rec_ramp_pos_inc = is_rec_on ? 1 : -1;
     }
 
     void SetLoop(const float loop_start, const float loop_length) {
@@ -29,13 +30,18 @@ class Looper {
       if (_loop_start == -1) _loop_start = _pending_loop_start;
       _loop_length = max(kMinLoopLength, static_cast<long>(loop_length * _buffer_length));
     }
-
+  
     float Process(float in) {
       // Record to the buffer
-      if (_rec_on) {
-        _is_empty = false;
+      if (_rec_ramp_pos_inc > 0 && _rec_ramp_pos < kFadeLength
+       || _rec_ramp_pos_inc < 0 && _rec_ramp_pos > 0) {
+          _rec_ramp_pos += _rec_ramp_pos_inc;
+      }
+      
+      if (_rec_ramp_pos > 0) {
+        float rec_attenuation = static_cast<float>(_rec_ramp_pos) / static_cast<float>(kFadeLength);
         auto rec_pos = _rec_head % _buffer_length;
-        _buffer[rec_pos] = in;
+        _buffer[rec_pos] = in * rec_attenuation + _buffer[rec_pos] * (1.f - rec_attenuation);
         _rec_head ++;
       }
 
@@ -66,7 +72,7 @@ class Looper {
     }
 
   private:
-    const long kFadeLength = 300;
+    const long kFadeLength = 600;
     const long kMinLoopLength = 2 * kFadeLength;
 
     float* _buffer;
@@ -79,7 +85,8 @@ class Looper {
     long _play_head = 0;
     long _rec_head  = 0;
 
-    bool _rec_on    = false;
+    long _rec_ramp_pos      = 0;
+    long _rec_ramp_pos_inc  = 0;
     bool _is_empty  = true;
 };
 };
