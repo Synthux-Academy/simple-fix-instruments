@@ -5,7 +5,7 @@ static float DSY_SDRAM_BSS buffer[synthux::Looper::kBufferLenghtSamples];
 
 synthux::Looper lpr;
 
-static const int kKnobResolution = 7;
+static const int kKnobResolution = 10;
 static const float kKnobMax = pow(2, kKnobResolution);
 
 void AudioCallback(float **in, float **out, size_t size) {
