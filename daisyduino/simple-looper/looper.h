@@ -49,28 +49,30 @@ class Looper {
         _buffer[rec_pos] = in * rec_attenuation + _buffer[rec_pos] * (1.f - rec_attenuation);
         _rec_head ++;
       }
+      
+      if (_is_empty) {
+        return 0;
+      }
 
       // Playback from the buffer
       float attenuation = 1;
       float output = 0;
-      if (!_is_empty) {
-        //Calculate fade in/out
-        if (_play_head < kFadeLength) {
-          attenuation = static_cast<float>(_play_head) / static_cast<float>(kFadeLength);
-        }
-        else if (_play_head >= _loop_length - kFadeLength) {
-          attenuation = static_cast<float>(_loop_length - _play_head) / static_cast<float>(kFadeLength);
-        }
-        
-        // Read from the buffer
-        auto play_pos = (_loop_start + _play_head) % _buffer_length;
-        output = _buffer[play_pos] * attenuation;
+      //Calculate fade in/out
+      if (_play_head < kFadeLength) {
+        attenuation = static_cast<float>(_play_head) / static_cast<float>(kFadeLength);
+      }
+      else if (_play_head >= _loop_length - kFadeLength) {
+        attenuation = static_cast<float>(_loop_length - _play_head) / static_cast<float>(kFadeLength);
+      }
+      
+      // Read from the buffer
+      auto play_pos = (_loop_start + _play_head) % _buffer_length;
+      output = _buffer[play_pos] * attenuation;
 
-        // Advance playhead
-        if (++_play_head >= _loop_length) {
-          _loop_start = _pending_loop_start;
-          _play_head = 0;
-        }
+      // Advance playhead
+      if (++_play_head >= _loop_length) {
+        _loop_start = _pending_loop_start;
+        _play_head = 0;
       }
       
       return output * attenuation;
