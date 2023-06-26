@@ -30,13 +30,21 @@ class Looper {
     }
 
     void SetLoop(const float loop_start, const float loop_length) {
+      // Set the start of the next loop
       _pending_loop_start = static_cast<long>(loop_start * (_buffer_length - 1));
+
+      // If the current loop start is not set yet, set it too
       if (_loop_start == -1) _loop_start = _pending_loop_start;
-      _loop_length = max(kMinLoopLength, static_cast<long>(loop_length * _buffer_length));
+
+      // Set the length of the next loop
+      _pending_loop_length = max(kMinLoopLength, static_cast<long>(loop_length * _buffer_length));
+
+      //If the current loop length is not set yet, set it too
+      if (_loop_length == - 1) _loop_length = _pending_loop_length;
     }
   
     float Process(float in) {
-      // Calculate iterator position on the ramp.
+      // Calculate iterator position on the record level ramp.
       if (_rec_ramp_pos_inc > 0 && _rec_ramp_pos < kFadeLength
        || _rec_ramp_pos_inc < 0 && _rec_ramp_pos > 0) {
           _rec_ramp_pos += _rec_ramp_pos_inc;
@@ -72,6 +80,7 @@ class Looper {
       // Advance playhead
       if (++_play_head >= _loop_length) {
         _loop_start = _pending_loop_start;
+        _loop_length = _pending_loop_length;
         _play_head = 0;
       }
       
@@ -85,7 +94,8 @@ class Looper {
     float* _buffer;
     
     long _buffer_length       = 0;
-    long _loop_length         = 0;
+    long _loop_length         = -1;
+    long _pending_loop_length  = 0;
     long _loop_start          = -1;
     long _pending_loop_start  = 0;
 
