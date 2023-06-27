@@ -8,8 +8,7 @@ static const int loop_start_pin  = A(S31);
 static const int loop_length_pin = A(S32);
 static const int pitch_pin       = A(S33);
 
-static const int kKnobResolution = 7;
-static const float kKnobMax = pow(2, kKnobResolution);
+static const float kKnobMax = 1023;
 
 // Allocate buffer in SDRAM 
 static float DSY_SDRAM_BSS buffer[synthux::Looper::kBufferLenghtSamples];
@@ -45,7 +44,6 @@ void setup() {
   pitch_shifter.Init(sample_rate);
 
   // Setup pins
-  analogReadResolution(kKnobResolution);
   pinMode(record_pin, INPUT);
 
   DAISY.begin(AudioCallback);
