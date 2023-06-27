@@ -78,7 +78,8 @@ class Looper {
       output = _buffer[play_pos] * attenuation;
 
       // Advance playhead
-      if (++_play_head >= _loop_length) {
+      _play_head ++;
+      if (_play_head >= _loop_length) {
         _loop_start = _pending_loop_start;
         _loop_length = _pending_loop_length;
         _play_head = 0;
