@@ -11,7 +11,10 @@ static const int pitch_pin       = A(S33);
 static const float kKnobMax = 1023;
 
 // Allocate buffer in SDRAM 
-static float DSY_SDRAM_BSS buffer[synthux::Looper::kBufferLenghtSamples];
+static const uint32_t kBufferLengthSec = 5;
+static const uint32_t kSampleRate = 48000;
+static const size_t kBufferLenghtSamples = kBufferLengthSec * kSampleRate;
+static float DSY_SDRAM_BSS buffer[kBufferLenghtSamples];
 
 synthux::Looper looper;
 PitchShifter pitch_shifter;
@@ -38,7 +41,7 @@ void setup() {
   float sample_rate = DAISY.get_samplerate();
 
   // Setup looper
-  looper.Init(sample_rate, buffer, synthux::Looper::kBufferLenghtSamples);
+  looper.Init(sample_rate, buffer, kBufferLenghtSamples);
 
   // Setup pitch shifter
   pitch_shifter.Init(sample_rate);

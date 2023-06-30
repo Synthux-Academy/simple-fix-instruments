@@ -4,12 +4,7 @@ namespace synthux {
 
 class Looper {
   public:
-
-    static const long kBufferLengthSec = 5;
-    static const long kSampleRate = 48000;
-    static const long kBufferLenghtSamples = kBufferLengthSec * kSampleRate;
-
-    void Init(float sample_rate, float *buf, long length) {
+    void Init(float sample_rate, float *buf, size_t length) {
       _buffer = buf;
       _buffer_length = length;
       // Reset buffer contents to zero
@@ -18,7 +13,7 @@ class Looper {
 
     void SetRecording(bool is_rec_on) {
         //Initialize recording head position on start
-        if (_rec_ramp_pos_inc <= 0 && is_rec_on) {
+        if (_rec_env_pos_inc <= 0 && is_rec_on) {
             _rec_head = (_loop_start + _play_head) % _buffer_length; 
             _is_empty = false;
         }
@@ -26,18 +21,18 @@ class Looper {
         // sets ramp to rising/falling, providing a
         // fade in/out in the beginning and at the end of 
         // the recorded region.
-        _rec_ramp_pos_inc = is_rec_on ? 1 : -1;
+        _rec_env_pos_inc = is_rec_on ? 1 : -1;
     }
 
     void SetLoop(const float loop_start, const float loop_length) {
       // Set the start of the next loop
-      _pending_loop_start = static_cast<long>(loop_start * (_buffer_length - 1));
+      _pending_loop_start = static_cast<size_t>(loop_start * (_buffer_length - 1));
 
       // If the current loop start is not set yet, set it too
       if (_loop_start == -1) _loop_start = _pending_loop_start;
 
       // Set the length of the next loop
-      _pending_loop_length = max(kMinLoopLength, static_cast<long>(loop_length * _buffer_length));
+      _pending_loop_length = max(kMinLoopLength, static_cast<size_t>(loop_length * _buffer_length));
 
       //If the current loop length is not set yet, set it too
       if (_loop_length == - 1) _loop_length = _pending_loop_length;
@@ -45,14 +40,14 @@ class Looper {
   
     float Process(float in) {
       // Calculate iterator position on the record level ramp.
-      if (_rec_ramp_pos_inc > 0 && _rec_ramp_pos < kFadeLength
-       || _rec_ramp_pos_inc < 0 && _rec_ramp_pos > 0) {
-          _rec_ramp_pos += _rec_ramp_pos_inc;
+      if (_rec_env_pos_inc > 0 && _rec_env_pos < kFadeLength
+       || _rec_env_pos_inc < 0 && _rec_env_pos > 0) {
+          _rec_env_pos += _rec_env_pos_inc;
       }
       // If we're in the middle of the ramp - record to the buffer.
-      if (_rec_ramp_pos > 0) {
+      if (_rec_env_pos > 0) {
         // Calculate fade in/out
-        float rec_attenuation = static_cast<float>(_rec_ramp_pos) / static_cast<float>(kFadeLength);
+        float rec_attenuation = static_cast<float>(_rec_env_pos) / static_cast<float>(kFadeLength);
         auto rec_pos = _rec_head % _buffer_length;
         _buffer[rec_pos] = in * rec_attenuation + _buffer[rec_pos] * (1.f - rec_attenuation);
         _rec_head ++;
@@ -89,22 +84,22 @@ class Looper {
     }
 
   private:
-    const long kFadeLength = 600;
-    const long kMinLoopLength = 2 * kFadeLength;
+    static const size_t kFadeLength = 600;
+    static const size_t kMinLoopLength = 2 * kFadeLength;
 
     float* _buffer;
     
-    long _buffer_length       = 0;
-    long _loop_length         = -1;
-    long _pending_loop_length  = 0;
-    long _loop_start          = -1;
-    long _pending_loop_start  = 0;
+    size_t _buffer_length       = 0;
+    size_t _loop_length         = -1;
+    size_t _pending_loop_length = 0;
+    size_t _loop_start          = -1;
+    size_t _pending_loop_start  = 0;
 
-    long _play_head = 0;
-    long _rec_head  = 0;
+    size_t _play_head = 0;
+    size_t _rec_head  = 0;
 
-    long _rec_ramp_pos      = 0;
-    long _rec_ramp_pos_inc  = 0;
+    size_t _rec_env_pos      = 0;
+    int32_t _rec_env_pos_inc = 0;
     bool _is_empty  = true;
 };
 };
