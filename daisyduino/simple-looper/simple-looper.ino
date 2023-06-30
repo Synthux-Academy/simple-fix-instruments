@@ -16,18 +16,8 @@ static const uint32_t kSampleRate = 48000;
 static const size_t kBufferLenghtSamples = kBufferLengthSec * kSampleRate;
 static float DSY_SDRAM_BSS buffer[kBufferLenghtSamples];
 
-synthux::Looper looper;
-PitchShifter pitch_shifter;
-
-void set_pitch(float pitch_val) {
-  int pitch = 0;
-  // Allow some gap in the middle of the knob turn so 
-  // it's easy to cacth zero position
-  if (pitch_val < 0.45 || pitch_val > 0.55) {
-    pitch = 12.0 * (pitch_val - 0.5);
-  }
-  pitch_shifter.SetTransposition(pitch);
-}
+static synthux::Looper looper;
+static PitchShifter pitch_shifter;
 
 void AudioCallback(float **in, float **out, size_t size) {
   for (size_t i = 0; i < size; i++) {
@@ -65,4 +55,14 @@ void loop() {
   // Set pitch
   auto pitch_val = fmap(analogRead(pitch_pin) / kKnobMax, 0.f, 1.f);
   set_pitch(pitch_val);
+}
+
+void set_pitch(float pitch_val) {
+  int pitch = 0;
+  // Allow some gap in the middle of the knob turn so 
+  // it's easy to cacth zero position
+  if (pitch_val < 0.45 || pitch_val > 0.55) {
+    pitch = 12.0 * (pitch_val - 0.5);
+  }
+  pitch_shifter.SetTransposition(pitch);
 }
