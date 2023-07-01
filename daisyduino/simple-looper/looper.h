@@ -48,9 +48,9 @@ class Looper {
       if (_rec_env_pos > 0) {
         // Calculate fade in/out
         float rec_attenuation = static_cast<float>(_rec_env_pos) / static_cast<float>(kFadeLength);
-        auto rec_pos = _rec_head % _buffer_length;
-        _buffer[rec_pos] = in * rec_attenuation + _buffer[rec_pos] * (1.f - rec_attenuation);
+        _buffer[_rec_head] = in * rec_attenuation + _buffer[_rec_head] * (1.f - rec_attenuation);
         _rec_head ++;
+        _rec_head %= _buffer_length;
       }
       
       if (_is_empty) {
