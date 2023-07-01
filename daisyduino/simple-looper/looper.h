@@ -4,7 +4,7 @@ namespace synthux {
 
 class Looper {
   public:
-    void Init(float sample_rate, float *buf, size_t length) {
+    void Init(float *buf, size_t length) {
       _buffer = buf;
       _buffer_length = length;
       // Reset buffer contents to zero

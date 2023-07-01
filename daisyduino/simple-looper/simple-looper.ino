@@ -31,7 +31,7 @@ void setup() {
   float sample_rate = DAISY.get_samplerate();
 
   // Setup looper
-  looper.Init(sample_rate, buffer, kBufferLenghtSamples);
+  looper.Init(buffer, kBufferLenghtSamples);
 
   // Setup pitch shifter
   pitch_shifter.Init(sample_rate);
