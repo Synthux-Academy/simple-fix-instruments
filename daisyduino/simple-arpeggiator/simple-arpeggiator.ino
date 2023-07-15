@@ -40,7 +40,7 @@ void AudioCallback(float **in, float **out, size_t size) {
       for (auto& vox: voxs) output += vox.Process();
   
     }
-    out[0][i] = out[1][i] = output * 0.9;
+    out[0][i] = out[1][i] = output * 0.8;
   }
 }
 
@@ -55,11 +55,10 @@ void setup() {
   Serial.begin(9600);
 
   // VOX SETUP
-  float voxFreq = Vox::kOscLowestFreq;
+  int freqSteps = 2;
   for (auto& vox: voxs) {
-    vox.Init(sampleRate, voxFreq);
-    voxFreq *= 1.5;
-    if (voxFreq > 1500) voxFreq *= 0.5;
+    vox.Init(sampleRate, freqSteps);
+    freqSteps ++;
   }
 
   metro.Init(4, sampleRate);
@@ -78,9 +77,7 @@ void loop() {
   for (auto& vox: voxs) { vox.Read(S31, S32); }
   auto p = digitalRead(S30);
   if (p != pushed) {
-    Serial.println("Pushed");
     if (p) { 
-      Serial.println(p);
       run = !run; 
       }
     pushed = p;

@@ -2,58 +2,43 @@
 
 #include "DaisyDuino.h"
 
+namespace synthux {
+
 class Vox {
 public:
-
-static constexpr float kOscLowestFreq = 36;
-static constexpr float kStep = 2187.f / 2048.f;
-
-
-void Init(float sampleRate, int oscHighestFreq) {
+void Init(float sample_rate) {
   // OSCILLATOR SETUP
   _osc.Init(sampleRate);
   _osc.SetWaveform(Oscillator::WAVE_TRI);
-  _oscHighestFreq = oscHighestFreq;
 
   // LFO SETUP
-  _lfo.Init(sampleRate);
+  _lfo.Init(sample_rate);
   _lfo.SetFreq(random(50, 150) / 10.0);
-  _lfo.SetWaveform(_lfo.WAVE_SIN);
+  _lfo.SetWaveform(_lfo.WAVE_POLYBLEP_TRI);
+  _lfo.SetAmp(0.005);
 
   //ENV SETUP
-  _env.Init(sampleRate);
+  _env.Init(sample_rate);
   _env.SetTime(ADSR_SEG_ATTACK, .05);
-  _env.SetTime(ADSR_SEG_DECAY, .1);
   _env.SetTime(ADSR_SEG_RELEASE, .2);
 }
 
-void Trigger() {
+void NoteOn(float freq) {
   _gate = open;
+  _osc_freq = freq;
 }
 
-void Read(int oscPitchPin, int oscFreqPin) {
-  auto oscFreqOffset = fmap(analogRead(oscPitchPin) / 1023.f, 0, 500);
-  auto oscFreqMin =  kOscLowestFreq + oscFreqOffset;
-  auto oscFreqMax = _oscHighestFreq + oscFreqOffset;
-  _oscFreq = fmap(analogRead(oscFreqPin) / 1023.f, oscFreqMin, oscFreqMax);
-  // auto f = round((_oscFreq - oscFreqMin) / kStep);
-  // _oscFreq = oscFreqMin + f * kStep;
-  auto lfoAmp = fmap(analogRead(oscFreqPin) / 1023.f, 0.f, 0.005);
-  _lfo.SetAmp(lfoAmp);
+void NoteOff() {
+  _gate = closed;
 }
 
-float Process() {
-  
+float Process() { 
     auto amp = _env.Process(_gate == open);
-    
     if (!_env.IsRunning()) {
+      _osc.SetFreq(_osc_freq * (1.f + _lfo.Process()));
       return 0;
     }
-    if (_env.GetCurrentSegment() == ADSR_SEG_DECAY) {
-      _gate = closed;
-    }
     _osc.SetAmp(amp);
-    _osc.SetFreq(_oscFreq * (1.f + _lfo.Process()));
     return _osc.Process();
 }
 
@@ -63,14 +48,10 @@ private:
     open
   };
 
+  Gate _gate = closed;
+  float _osc_freq;
   Oscillator _osc;
   Oscillator _lfo;
   Adsr _env;
-  float _oscFreq;
-  float _oscHighestFreq;
-
-  Gate _gate = closed;
-  long _gateTimeout = 0;
-  long kGateMaxTimeout = 600;
-
+};
 };
