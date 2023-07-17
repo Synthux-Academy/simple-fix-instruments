@@ -6,41 +6,34 @@
 ///////////////////////////////////////////////////////////////
 ///////////////////// LIBRARIES & HARDWARE ////////////////////
 #include "vox.h"
+#include "arp.h"
+#include "term.h"
+#include "scale.h"
 
 ///////////////////////////////////////////////////////////////
 ///////////////////// MODULES /////////////////////////////////
 
-static const int kVoxCount = 15;
-static const float kVoxVolumeKof = 1;
-static Vox voxs[kVoxCount];
-static Metro metro;
+using namespace synthux;
 
-size_t vox_index = 0;
-bool run = false;
-bool pushed = false;
+static Vox vox;
+static Metro metro;
+static Scale scale;
+static Terminal term;
+static Arp arp;
+
+void OnTerminalNoteOn(int32_t num) { arp.NoteOn(num); }
+void OnTerminalNoteOff(int32_t num) { arp.NoteOff(num); }
+void OnArpNoteOn(int32_t num) { vox.NoteOn(scale.freqAt(num)); }
+void OnArpNoteOff(int32_t num) { vox.NoteOff(); }
+
+bool is_playing = false;
 
 ///////////////////////////////////////////////////////////////
 ///////////////////// AUDIO CALLBACK (PATCH) //////////////////
 void AudioCallback(float **in, float **out, size_t size) {
-
   for (size_t i = 0; i < size; i++) {
-    float output = 0;
-    if (run) {
-      auto tick = metro.Process();
-      if (tick) {
-        auto p_index = vox_index;
-        // if (random(0, 99) > 50) {
-        //   p_index = random(0, kVoxCount);
-        // }
-        voxs[p_index].Trigger();
-        vox_index ++;
-        vox_index %= kVoxCount;
-      }
-      
-      for (auto& vox: voxs) output += vox.Process();
-  
-    }
-    out[0][i] = out[1][i] = output * 0.8;
+    if (is_playing && metro.Process()) arp.Trigger();
+    out[0][i] = out[1][i] = vox.Process();
   }
 }
 
@@ -50,21 +43,25 @@ void AudioCallback(float **in, float **out, size_t size) {
 void setup() {  
   // DAISY SETUP
   DAISY.init(DAISY_SEED, AUDIO_SR_48K);
-  auto sampleRate = DAISY.get_samplerate();
+  auto sample_rate = DAISY.get_samplerate();
 
-  Serial.begin(9600);
+//  Serial.begin(9600);
 
   // VOX SETUP
-  int freqSteps = 2;
-  for (auto& vox: voxs) {
-    vox.Init(sampleRate, freqSteps);
-    freqSteps ++;
-  }
+  vox.Init(sample_rate);
 
-  metro.Init(4, sampleRate);
+  metro.Init(48, sample_rate); //120bpm 24ppqn
 
+  term.SetOnNoteOn(OnTerminalNoteOn);
+  term.SetOnNoteOff(OnTerminalNoteOff);
+
+  arp.SetOnNoteOn(OnArpNoteOn);
+  arp.SetOnNoteOff(OnArpNoteOff);
+  
   // GATE SWITCH SETUP
   pinMode(S30, INPUT_PULLDOWN);
+
+  analogReadResolution(7);
 
   // BEGIN CALLBACK
   DAISY.begin(AudioCallback);
@@ -74,14 +71,21 @@ void setup() {
 ///////////////////// LOOP ////////////////////////////////////
 
 void loop() {
-  for (auto& vox: voxs) { vox.Read(S31, S32); }
-  auto p = digitalRead(S30);
-  if (p != pushed) {
-    if (p) { 
-      run = !run; 
-      }
-    pushed = p;
-  }
+  is_playing = digitalRead(S30);
+
+  auto speed = analogRead(S31) / 127.f;
+  auto freq = 16.f + 80.f * speed;
+  metro.SetFreq(freq); 
+
+  auto notes = analogRead(S32) / 127.f; 
+  term.Read(notes);
   
+  auto arp_ctr = analogRead(S33) / 127.f;
+  auto arp_dir = arp_ctr < .5f ? Arp::Direction::up : Arp::Direction::down;
+  auto arp_rnd = arp_ctr < .5f ? 2.f * arp_ctr : 2.f * (1.f - arp_ctr);
+  arp.SetDirection(arp_dir);
+  arp.SetRandomize(arp_rnd);
+
   delay(4);
 }
+

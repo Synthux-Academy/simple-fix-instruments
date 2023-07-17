@@ -7,14 +7,13 @@ namespace synthux {
     Scale() {
       float freq = 36.f;
       float third;
-      float half;
       size_t i = 0;
       while (i < kScaleSize) {
         third = freq * 1.25f;
-        if (third < kMaxFreq) _scale[i++] = third;
+        if (third > kMaxFreq) third *= .5f;
+        _scale[i++] = third;
         if (freq < kMaxFreq) _scale[i++] = freq;
-        half = freq * .5f;
-        if (half < kMaxFreq) _scale[i++] = half;
+        _scale[i++] = freq * .5f;
         freq *= 1.5f;
       }
     }
@@ -24,9 +23,8 @@ namespace synthux {
     }
 
   private:
-      static const float kMaxFreq = 1500;
-      static const int kScaleSize = 30;
+      static constexpr float kMaxFreq = 1500;
+      static const int kScaleSize = 36;
       float _scale[kScaleSize];
-  }
-  
+  };
 };
