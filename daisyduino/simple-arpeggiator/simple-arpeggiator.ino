@@ -21,10 +21,10 @@ static Scale scale;
 static Terminal term;
 static Arp arp;
 
-void OnTerminalNoteOn(int32_t num) { arp.NoteOn(num); }
-void OnTerminalNoteOff(int32_t num) { arp.NoteOff(num); }
-void OnArpNoteOn(int32_t num) { vox.NoteOn(scale.freqAt(num)); }
-void OnArpNoteOff(int32_t num) { vox.NoteOff(); }
+void OnTerminalNoteOn(uint8_t num) { arp.NoteOn(num); }
+void OnTerminalNoteOff(uint8_t num) { arp.NoteOff(num); }
+void OnArpNoteOn(uint8_t num) { vox.NoteOn(scale.freqAt(num)); }
+void OnArpNoteOff(uint8_t num) { vox.NoteOff(); }
 
 bool is_playing = false;
 

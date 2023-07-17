@@ -2,7 +2,7 @@
 
 namespace synthux {
 
-  typedef void(*NoteCallback)(int32_t num);
+  typedef void(*NoteCallback)(uint8_t num);
 
   class Arp {
   public:
@@ -15,10 +15,10 @@ namespace synthux {
       Clear();
     }
 
-    void NoteOn(int num) {
-      size_t slot = 1;
+    void NoteOn(uint8_t num) {
+      uint8_t slot = 1;
       while (slot < kBufferSize + 1) {
-        if (_notes[slot].num == kEmpty) break;
+        if (_notes[slot].next == kUnlinked) break;
         slot++;
       }
       if (slot == kBufferSize + 1) {
@@ -41,9 +41,9 @@ namespace synthux {
       _size ++;
     }
 
-    void NoteOff(int num) {
-      size_t idx = 0;
-      for (size_t i = 0; i < _size; i++)
+    void NoteOff(uint8_t num) {
+      uint8_t idx = 0;
+      for (uint8_t i = 0; i < _size; i++)
           if (_notes[i].num == num) {
               idx = i;
               break;
@@ -78,7 +78,7 @@ namespace synthux {
       if (_counter++ < 6) return;
       
       _counter = 0;
-      size_t note_idx;
+      uint8_t note_idx;
       switch (_direction) {
         case up: 
           note_idx = _notes[_current_idx].next; 
@@ -92,10 +92,10 @@ namespace synthux {
       }
 
       if (_rand > 0.05 && _rand < 0.95) {
-        auto rnd = static_cast<float>(random(0, 100)) / 100.f;
-        if (rnd <= _rand) {
-          note_idx = random(1, _size - 1);
-        }
+       auto rnd = static_cast<float>(random(0, 100)) / 100.f;
+       if (rnd <= _rand) {
+         note_idx = random(1, _size - 1);
+       }
       }
 
       _current_idx = note_idx;
@@ -104,29 +104,29 @@ namespace synthux {
     }
 
     void Clear() {
-      memset(_input_order, 0, sizeof(size_t) * kBufferSize);
+      memset(_input_order, 0, sizeof(uint8_t) * kBufferSize);
       _notes[0].num = kSentinel;
       _notes[0].prev = 0;
       _notes[0].next = 0;
       _size = 1;
-      for (size_t i = _size; i < kBufferSize + 1; i++) {
-          _notes[i].num = kEmpty;
-          _notes[i].prev = 0;
-          _notes[i].next = 0;
+      for (uint8_t i = _size; i < kBufferSize + 1; i++) {
+          _notes[i].num = 0;
+          _notes[i].prev = kUnlinked;
+          _notes[i].next = kUnlinked;
       }
     }
 
   private:
-    void _RemoveNote(size_t idx) {
+    void _RemoveNote(uint8_t idx) {
       _notes[_notes[idx].prev].next = _notes[idx].next;
       _notes[_notes[idx].next].prev = _notes[idx].prev;
       if (idx == _top_idx) _top_idx = _notes[idx].prev;
       else if (idx == _bottom_idx) _bottom_idx = _notes[idx].next;
-      _notes[idx].num = kEmpty;
-      _notes[idx].next = 0;
-      _notes[idx].prev = 0;
+      _notes[idx].num = 0;
+      _notes[idx].next = kUnlinked;
+      _notes[idx].prev = kUnlinked;
 
-      for (size_t i = 0; i < _size; i++) {
+      for (uint8_t i = 0; i < _size; i++) {
           if (_input_order[i] == idx) {
               while (i < _size) {
                   _input_order[i] = _input_order[i + 1];
@@ -138,28 +138,28 @@ namespace synthux {
     }
 
     struct Note {
-      size_t next;
-      size_t prev;
-      int32_t num;
+      uint8_t next;
+      uint8_t prev;
+      uint8_t num;
     };
 
-    static const int32_t kSentinel = 256;
-    static const int32_t kEmpty    = -1;
-    static const size_t kBufferSize = 15;
+    static const uint8_t kSentinel = 128;
+    static const uint8_t kUnlinked = 128;
+    static const uint8_t kBufferSize = 15;
 
     NoteCallback _on_note_on  = nullptr;
     NoteCallback _on_note_off = nullptr;
 
     Note _notes[kBufferSize + 1];
-    size_t _input_order[kBufferSize];
+    uint8_t _input_order[kBufferSize];
 
     Direction _direction = Direction::up;
     float _rand = 0;
     
-    size_t _top_idx      = 0;
-    size_t _bottom_idx   = 0;
-    size_t _current_idx  = 0;
-    size_t _counter      = 0;
-    size_t _size         = 0;
+    uint8_t _top_idx      = 0;
+    uint8_t _bottom_idx   = 0;
+    uint8_t _current_idx  = 0;
+    uint8_t _counter      = 0;
+    uint8_t _size         = 0;
   };
 };

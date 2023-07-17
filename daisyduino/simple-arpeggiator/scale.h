@@ -18,13 +18,13 @@ namespace synthux {
       }
     }
 
-    float freqAt(size_t idx) {
+    float freqAt(uint8_t idx) {
       return _scale[idx];
     }
 
   private:
       static constexpr float kMaxFreq = 1500;
-      static const int kScaleSize = 36;
+      static const uint8_t kScaleSize = 36;
       float _scale[kScaleSize];
   };
 };
