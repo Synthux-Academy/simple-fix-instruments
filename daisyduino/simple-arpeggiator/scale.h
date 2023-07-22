@@ -2,20 +2,26 @@
 
 namespace synthux {
 
+  // Maps note number to the frequency.
+  // The scale is being generated using superparticular ratios: 
+  // 3/2 aka fifth and 5/4 aka major third.
+  // If the frequency exceeds 1500Hz, it's getting wrapped 
+  // by an octave down untill it fits the limit.
+  template<uint8_t scale_size>
   class Scale {
   public:
     Scale() {
-      float freq = 36.f;
-      float third;
-      size_t i = 0;
-      while (i < kScaleSize) {
-        third = freq * 1.25f;
-        if (third > kMaxFreq) third *= .5f;
-        _scale[i++] = third;
-        if (freq < kMaxFreq) _scale[i++] = freq;
-        _scale[i++] = freq * .5f;
-        freq *= 1.5f;
-      }
+        float freq = 36.f;
+        float third;
+        size_t i = 0;
+        while (i < scale_size) {
+            while (freq > kMaxFreq) freq *= .5f;
+            _scale[i++] = freq;
+            third = freq * 1.25f;
+            while (third > kMaxFreq) third *= .5f;
+            _scale[i++] = third;
+            freq *= 1.5;
+        }
     }
 
     float freqAt(uint8_t idx) {
@@ -24,7 +30,7 @@ namespace synthux {
 
   private:
       static constexpr float kMaxFreq = 1500;
-      static const uint8_t kScaleSize = 36;
-      float _scale[kScaleSize];
+      float _scale[scale_size];
   };
 };
+
