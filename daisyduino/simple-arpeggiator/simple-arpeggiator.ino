@@ -77,7 +77,7 @@ void setup() {
 ////////////////////////// LOOP ///////////////////////////////
 
 void loop() {
-  is_playing = true;//digitalRead(S30);
+  is_playing = digitalRead(S30);
 
   auto speed = analogRead(S31) / kKnobMax;
   auto freq = 16.f + 80.f * speed;
@@ -91,6 +91,4 @@ void loop() {
   auto arp_rnd = arp_ctr < .5f ? 2.f * arp_ctr : 2.f * (1.f - arp_ctr);
   arp.SetDirection(arp_dir);
   arp.SetRandChance(arp_rnd);
-
-  delay(4);
 }
