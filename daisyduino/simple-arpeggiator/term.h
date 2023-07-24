@@ -8,12 +8,12 @@ namespace synthux {
   class Terminal {
     public:
 
-      // Register not on callback
+      // Register note on callback
       void SetOnNoteOn(void(*on_note_on)(uint8_t num, uint8_t vel)) {
         _on_note_on = on_note_on;
       }
 
-      // Register not off callback
+      // Register note off callback
       void SetOnNoteOff(void(*on_note_off)(uint8_t num)) {
         _on_note_off = on_note_off;
       }
@@ -47,13 +47,13 @@ namespace synthux {
         for (uint8_t i = notes_count; i > 0; i--) {
             idx = i-1;
             // Set voice to off, mimiking release of the key.
-            if (_on_note_off != nullptr) _on_note_off(_notes[idx]);
+            _on_note_off(_notes[idx]);
             
             // Generate note number for the voice at given offset
             _notes[idx] = static_cast<uint8_t>((scale_size - step * (notes_count - i)) * offset);
             
             // Set the note on, randomizing velocity
-            if (_on_note_on != nullptr) _on_note_on(_notes[idx], random(90, 127));
+            _on_note_on(_notes[idx], random(90, 127));
         }
       }
 

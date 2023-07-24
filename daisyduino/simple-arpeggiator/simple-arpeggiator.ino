@@ -80,7 +80,7 @@ void loop() {
   is_playing = digitalRead(S30);
 
   auto speed = analogRead(S31) / kKnobMax;
-  auto freq = 16.f + 80.f * speed; // for 24 PPQN
+  auto freq = 16.f + 80.f * speed; // for 24 ppqn
   metro.SetFreq(freq); 
 
   auto offset = analogRead(S32) / kKnobMax; 

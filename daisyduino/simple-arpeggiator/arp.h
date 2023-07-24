@@ -95,7 +95,7 @@ namespace synthux {
 
       // "Release" last played note
       if (_pulse_counter == _note_length && _current_idx > 0) {
-        if (_on_note_off != nullptr) _on_note_off(_notes[_current_idx].num);
+        _on_note_off(_notes[_current_idx].num);
       }
       
       // We trigger on every 1/16th
@@ -121,7 +121,7 @@ namespace synthux {
       _current_idx = note_idx;
 
       //Trigger the note  
-      if (_on_note_on != nullptr) _on_note_on(_notes[note_idx].num, _notes[note_idx].vel);
+      _on_note_on(_notes[note_idx].num, _notes[note_idx].vel);
     }
 
     void Clear() {
