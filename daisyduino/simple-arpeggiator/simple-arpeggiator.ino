@@ -14,19 +14,19 @@ using namespace synthux;
 #define S32 A2  // KNOB : CHORD
 #define S33 A3  // KNOB : DIRECTION / RANDOM
 
-#define ANALOG_RESOLUTION 7 //7bits => 0..127
-static const float kKnobMax = powf(2.f, ANALOG_RESOLUTION) - 1.f;
+static const int kAnalogResolution  = 7; //7bits => 0..127
+static const float kKnobMax = powf(2.f, kAnalogResolution) - 1.f;
 
 ////////////////////////////////////////////////////////////
 ///////////////////// MODULES //////////////////////////////
 
-#define NOTES_COUNT 12
-#define SCALE_SIZE  36
-#define PPQN        24
+static const uint8_t kNotesCount = 12;
+static const uint8_t kScaleSize = 36;
+static const uint8_t kPPQN = 24;
 
-static Scale<SCALE_SIZE> scale;
-static Terminal<NOTES_COUNT, SCALE_SIZE> term;
-static Arp<NOTES_COUNT, PPQN> arp;
+static Scale<kScaleSize> scale;
+static Terminal<kNotesCount, kScaleSize> term;
+static Arp<kNotesCount, kPPQN> arp;
 static Metro metro;
 static Vox vox;
 
@@ -68,7 +68,7 @@ void setup() {
   
   pinMode(S30, INPUT_PULLDOWN);
 
-  analogReadResolution(ANALOG_RESOLUTION);
+  analogReadResolution(kAnalogResolution);
 
   DAISY.begin(AudioCallback);
 }
@@ -80,7 +80,7 @@ void loop() {
   is_playing = digitalRead(S30);
 
   auto speed = analogRead(S31) / kKnobMax;
-  auto freq = 16.f + 80.f * speed;
+  auto freq = 16.f + 80.f * speed; // for 24 PPQN
   metro.SetFreq(freq); 
 
   auto offset = analogRead(S32) / kKnobMax; 
