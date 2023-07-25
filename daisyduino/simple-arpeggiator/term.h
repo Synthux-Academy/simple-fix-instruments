@@ -38,7 +38,7 @@ namespace synthux {
 
       void SetOffset(float offset) {
         // Prevent generating if there was no change in offset
-        auto note = static_cast<uint8_t>(scale_size * offset);
+        auto note = static_cast<uint8_t>((scale_size - 1) * offset);
         if (note == _notes[notes_count - 1]) return;
 
         // Step for note number range
@@ -50,7 +50,7 @@ namespace synthux {
             _on_note_off(_notes[idx]);
             
             // Generate note number for the voice at given offset
-            _notes[idx] = static_cast<uint8_t>((scale_size - step * (notes_count - i)) * offset);
+            _notes[idx] = static_cast<uint8_t>((scale_size - step * (notes_count - i) - 1) * offset);
             
             // Set the note on, randomizing velocity
             _on_note_on(_notes[idx], random(90, 127));
