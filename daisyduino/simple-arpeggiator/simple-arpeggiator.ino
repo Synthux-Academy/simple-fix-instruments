@@ -66,7 +66,7 @@ void setup() {
   arp.SetOnNoteOn(OnArpNoteOn);
   arp.SetOnNoteOff(OnArpNoteOff);
   
-  pinMode(S30, INPUT_PULLDOWN);
+  pinMode(S30, INPUT_PULLUP);
 
   analogReadResolution(kAnalogResolution);
 
