@@ -31,6 +31,15 @@ static Metro metro;
 static Vox vox;
 
 ////////////////////////////////////////////////////////////
+/////////////////// TEMPO 40 - 240BMP //////////////////////
+//Metro F = ppqn * (minBPM + BPMRange * (0...1)) / secPerMin
+static const float kMinBPM = 40;
+static const float kBPMRange = 200;
+static const float kSecPerMin = 60.f;
+static const float kMinFreq = 24 * 40 / 60.f;
+static const float kFreqRange = kPPQN * kBPMRange / kSecPerMin;
+
+////////////////////////////////////////////////////////////
 ///////////////////// CALLBACKS ////////////////////////////
 
 void OnTerminalNoteOn(uint8_t num, uint8_t vel) { arp.NoteOn(num, vel); }
@@ -80,7 +89,8 @@ void loop() {
   is_playing = digitalRead(S30);
 
   auto speed = analogRead(S31) / kKnobMax;
-  auto freq = 16.f + 80.f * speed; // for 24 ppqn
+  auto freq = kMinFreq + kFreqRange * speed;
+  
   metro.SetFreq(freq); 
 
   auto offset = analogRead(S32) / kKnobMax; 
