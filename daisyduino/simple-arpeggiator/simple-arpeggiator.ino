@@ -44,7 +44,7 @@ static const float kFreqRange = kPPQN * kBPMRange / kSecPerMin;
 
 void OnTerminalNoteOn(uint8_t num, uint8_t vel) { arp.NoteOn(num, vel); }
 void OnTerminalNoteOff(uint8_t num) { arp.NoteOff(num); }
-void OnArpNoteOn(uint8_t num, uint8_t vel) { vox.NoteOn(scale.freqAt(num)); }
+void OnArpNoteOn(uint8_t num, uint8_t vel) { vox.NoteOn(scale.freqAt(num), vel / 127.f); }
 void OnArpNoteOff(uint8_t num) { vox.NoteOff(); }
 
 bool is_playing = false;

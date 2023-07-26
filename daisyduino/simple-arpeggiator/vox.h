@@ -20,12 +20,13 @@ void Init(float sample_rate) {
   //ENV SETUP
   _env.Init(sample_rate);
   _env.SetTime(ADSR_SEG_ATTACK, .02);
-  _env.SetTime(ADSR_SEG_RELEASE, .1);
+  _env.SetTime(ADSR_SEG_RELEASE, .02);
 }
 
-void NoteOn(float freq) {
+void NoteOn(float freq, float amp) {
   _gate = open;
   _osc_freq = freq;
+  _osc_amp = amp;
 }
 
 void NoteOff() {
@@ -33,10 +34,10 @@ void NoteOff() {
 }
 
 float Process() { 
-    auto amp = _env.Process(_gate == open);
+    auto env_amp = _env.Process(_gate == open);
     if (!_env.IsRunning()) return 0;
     _osc.SetFreq(_osc_freq * (1.f + _lfo.Process()));
-    _osc.SetAmp(amp);
+    _osc.SetAmp(env_amp * _osc_amp);
     return _osc.Process();
 }
 
@@ -48,6 +49,7 @@ private:
 
   Gate _gate = closed;
   float _osc_freq;
+  float _osc_amp;
   Oscillator _osc;
   Oscillator _lfo;
   Adsr _env;
