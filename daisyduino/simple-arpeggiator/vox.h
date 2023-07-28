@@ -24,17 +24,17 @@ void Init(float sample_rate) {
 }
 
 void NoteOn(float freq, float amp) {
-  _gate = open;
   _osc_freq = freq;
   _osc_amp = amp;
+  OpenGate();
 }
 
 void NoteOff() {
-  _gate = closed;
+  CloseGate();
 }
 
 float Process() { 
-    auto env_amp = _env.Process(_gate == open);
+    auto env_amp = _env.Process(_gate);
     if (!_env.IsRunning()) return 0;
     _osc.SetFreq(_osc_freq * (1.f + _lfo.Process()));
     _osc.SetAmp(env_amp * _osc_amp);
@@ -42,12 +42,15 @@ float Process() {
 }
 
 private:
-  enum Gate {
-    closed,
-    open
-  };
+  void OpenGate() {
+    _gate = true;
+  }
 
-  Gate _gate = closed;
+  void CloseGate() {
+    _gate = false;
+  }
+
+  bool _gate = false;
   float _osc_freq;
   float _osc_amp;
   Oscillator _osc;
