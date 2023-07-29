@@ -16,6 +16,11 @@ namespace synthux {
     }
 
     void NoteOn(uint8_t num, uint8_t vel) {
+      //Currently we tolerate duplicates,
+      //but if you want to ensure each note
+      //is unique, uncomment:
+      // NoteOff(num);
+
       //Look for a free slot.
       uint8_t slot = 1;
       while (slot < note_count + 1) {
