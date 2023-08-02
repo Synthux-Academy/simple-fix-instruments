@@ -144,8 +144,8 @@ namespace synthux {
 
   private:
     void _RemoveNote(uint8_t idx) {
-      // Send note off
-      _on_note_off(_notes[idx].num);
+      // Send note off in polifonic cintext.
+      //_on_note_off(_notes[idx].num);
 
       // Link next/previous notes to each other,
       // excluding the removed note from the chain.
