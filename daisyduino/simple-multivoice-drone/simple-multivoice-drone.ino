@@ -53,7 +53,7 @@ void setup() {
   flt.Init(sampleRate);
 
   // GATE SWITCH SETUP
-  pinMode(S30, INPUT_PULLDOWN);
+  pinMode(S30, INPUT_PULLUP);
 
   // BEGIN CALLBACK
   DAISY.begin(AudioCallback);

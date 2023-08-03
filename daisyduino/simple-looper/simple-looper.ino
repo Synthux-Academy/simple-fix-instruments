@@ -37,7 +37,7 @@ void setup() {
   pitch_shifter.Init(sample_rate);
 
   // Setup pins
-  pinMode(record_pin, INPUT);
+  pinMode(record_pin, INPUT_PULLUP);
 
   DAISY.begin(AudioCallback);
 }
