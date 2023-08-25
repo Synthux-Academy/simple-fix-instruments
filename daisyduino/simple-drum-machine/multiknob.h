@@ -2,6 +2,8 @@
 
 #include <array>
 
+namespace synthux {
+
 template<uint8_t out_count>
 class MultiKnob {
 public:
@@ -41,4 +43,6 @@ private:
   uint16_t _recent_value;
   uint16_t _sensitivity;
   std::array<uint16_t, out_count> _values;
+};
+
 };

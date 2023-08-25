@@ -1,6 +1,8 @@
 #pragma once
 #include <array>
 
+namespace synthux {
+
 class CPattern {
 public:
     CPattern():
@@ -79,4 +81,6 @@ private:
     uint32_t _max_onsets;
     uint32_t _next_point;
     uint32_t _shift;
+};
+
 };

@@ -2,6 +2,8 @@
 
 #include "DaisyDuino.h"
 
+namespace synthux {
+
 class SimpleSD {
 public:
 
@@ -26,4 +28,6 @@ private:
   Adsr _env;
   WhiteNoise _noise;
   Oscillator _osc;
+};
+
 };

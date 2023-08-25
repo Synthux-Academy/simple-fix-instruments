@@ -1,6 +1,8 @@
 #include "WSerial.h"
 #pragma once
 
+namespace synthux {
+
 class Trigger {
 public:
     static constexpr uint32_t kPPQN = 48; // pulses per quarter note
@@ -50,4 +52,6 @@ private:
     uint32_t _next_tick;
     uint32_t _swing;
     bool _is_odd;
+};
+
 };

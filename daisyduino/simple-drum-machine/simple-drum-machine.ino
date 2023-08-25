@@ -5,6 +5,8 @@
 #include "simplebd.h"
 #include "simplesd.h"
 
+using namespace synthux;
+
 static Metro metro;
 static Trigger trig;
 
