@@ -16,9 +16,9 @@ public:
     {}
 
     void SetSwing(const float frac_swing) {
-        // |  0  |  1  |  2  |  3  |  4  |  5  |  6  |
-        // | 50% | 54% | 58% | 62% | 66% | 70% | 75% |
-        _swing = static_cast<uint32_t>(round(frac_swing * 6));
+        // |  0  |  1  |  2  |  3  |  4  |  5  |
+        // | 50% | 54% | 58% | 62% | 66% | 70% |
+        _swing = static_cast<uint32_t>(round(frac_swing * 5));
     }
 
     bool Tick() {
