@@ -24,11 +24,12 @@ public:
       if (++_current_out == out_count) _current_out = 0;
     }
     _is_selector_pin_high = selector_pin_high;
-
-    if (abs(knob_value - _recent_value) > _sensitivity && _recent_value != 0xffff) {
-      _values[_current_out] = knob_value;
+    if (_recent_value == 0xffff) _recent_value = knob_value;
+    
+    if (abs(knob_value - _recent_value) > _sensitivity) {
+      _values[_current_out] = knob_value;      
+      _recent_value = knob_value;
     }
-    _recent_value = knob_value;
   }
 
   uint16_t ValueAt(uint8_t index) {
