@@ -31,9 +31,7 @@ float output = 0;
 bool is_playing = false;
 bool bd_trig = false;
 bool sd_trig = false;  
-bool hh_trig = false; 
-
-uint32_t blink_counter = 0;
+bool hh_trig = false;
 
 ////////////////////////////////////////////////////////////
 /////////////////// TEMPO 40 - 240BMP //////////////////////
@@ -51,16 +49,6 @@ void AudioCallback(float **in, float **out, size_t size) {
     sd_trig = false;  
     hh_trig = false;    
     auto t = metro.Process();
-    if (t) {
-      if (blink_counter++ == Trigger::kPPQN) {
-        digitalWrite(LED_BUILTIN, true);
-        blink_counter = 0;
-      }
-      else {
-        digitalWrite(LED_BUILTIN, false);
-      }
-    }
-    
     if (is_playing) {
       if (t && trig.Tick()) {
         bd_trig = bd_pattern.Tick();
@@ -92,7 +80,6 @@ void setup() {
 
   pinMode(kSwitchPin, INPUT_PULLUP);
   pinMode(kRunPin, INPUT_PULLUP);
-  pinMode(LED_BUILTIN, OUTPUT);
 
   DAISY.begin(AudioCallback);
 }
@@ -129,5 +116,5 @@ void loop() {
   sd_pattern.SetShift(shift_knob.ValueAt(1) / 1023.f);
   hh_pattern.SetShift(shift_knob.ValueAt(2) / 1023.f);
 
-  delay(50);
+  delay(10);
 }
