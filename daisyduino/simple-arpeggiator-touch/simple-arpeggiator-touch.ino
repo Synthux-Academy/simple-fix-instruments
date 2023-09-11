@@ -79,6 +79,7 @@ void setup() {
   arp.SetOnNoteOff(OnArpNoteOff);
   
   pinMode(S30, INPUT_PULLUP);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   analogReadResolution(kAnalogResolution);
 
@@ -96,8 +97,7 @@ void loop() {
   
   metro.SetFreq(freq); 
 
-  // auto offset = analogRead(S32) / kKnobMax; 
-  // term.SetOffset(offset);
+  digitalWrite(LED_BUILTIN, term.IsLatched());
   
   term.Process();
 

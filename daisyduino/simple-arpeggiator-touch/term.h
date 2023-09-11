@@ -38,6 +38,10 @@ namespace synthux {
         _on_note_off = on_note_off;
       }
 
+      bool IsLatched() {
+        return _latch;
+      }
+
       void Process() {
           uint16_t p;
           bool is_touched;
