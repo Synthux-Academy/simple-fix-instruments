@@ -67,7 +67,7 @@ namespace synthux {
       // container of the notes list is plain array so we can 
       // just for-loop through it.
       uint8_t idx = 0;
-      for (uint8_t i = 0; i < _size; i++) {
+      for (uint8_t i = 0; i < note_count; i++) {
         if (_notes[i].num == num) {
             idx = i;
             break;
@@ -96,7 +96,10 @@ namespace synthux {
 
     void Trigger() {
       // If only a sentinel note is there, i.e. no notes played, do nothing.
-      if (_size <= 1) return;
+      if (_size <= 1) {
+        _current_idx = 0;
+        return;
+      }
 
       // "Release" last played note
       if (_pulse_counter == _note_length && _current_idx > 0) {
