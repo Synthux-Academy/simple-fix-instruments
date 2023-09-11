@@ -67,19 +67,11 @@ namespace synthux {
             is_touched = state & p;
             was_touched = _state & p;
             if (is_touched && !was_touched) {
-              if (_hold[i]) {
-                _on_note_off(i);
-                _hold[i] = false;
-              }
-              else {
-                _on_note_on(i, 127);
-                _hold[i] = _latch;
-              }
+              if (_latch && _hold[i]) _SetOff(i);
+              else _SetOn(i);
             }
             else if (!is_touched && was_touched) {
-              if (!_latch) {
-                _on_note_off(i);  
-              }
+              if (!_latch) _SetOff(i);
             }
           }
 
@@ -87,6 +79,16 @@ namespace synthux {
       }
 
     private:
+      void _SetOn(uint16_t i) {
+        _on_note_on(i, 127);
+        _hold[i] = true;
+      }
+
+      void _SetOff(uint16_t i) {
+        _on_note_off(i);
+        _hold[i] = false;
+      }
+
       void(*_on_note_on)(uint8_t num, uint8_t vel);
       void(*_on_note_off)(uint8_t num);
 
