@@ -94,6 +94,10 @@ namespace synthux {
       _rand_chance = rand;
     }
 
+    void SetAsPlayed(bool value) {
+      _as_played = value;
+    }
+
     void Trigger() {
       // If only a sentinel note is there, i.e. no notes played, do nothing.
       if (_size <= 1) return;
@@ -118,7 +122,7 @@ namespace synthux {
       if (_rand_chance > 0.05 && _rand_chance < 0.95) {
         auto rnd = static_cast<float>(random(0, 100)) / 100.f;  
         if (rnd <= _rand_chance) {
-          note_idx = random(1, _size - 1);
+          note_idx = _input_order[random(0, _size - 2)];
         }
      }
 
@@ -171,15 +175,27 @@ namespace synthux {
       }
       
       _size--;
+      if (_size <= 1) _played_idx = 0;
     }
 
     uint8_t _NextNoteIdx() {
+      if (_as_played) {
+        _played_idx ++;
+        if (_played_idx >= _size - 1) _played_idx = 0;
+        return _input_order[_played_idx];
+      }
+
       auto note_idx = _notes[_current_idx].next;
       //Jump over sentinel note
       return (note_idx == 0) ? _notes[note_idx].next : note_idx; 
     }
 
     uint8_t _PrevNoteIdx() {
+      if (_as_played) {
+        _played_idx = _played_idx == 0 ? _size - 2 : _played_idx - 1;
+        return _input_order[_played_idx];
+      }
+
       auto note_idx = _notes[_current_idx].prev; 
       //Jump over sentinel note
       return (note_idx == 0) ? _notes[note_idx].prev : note_idx;
@@ -207,7 +223,9 @@ namespace synthux {
     uint8_t _input_order[note_count];
 
     ArpDirection _direction = ArpDirection::fwd;
-    float _rand_chance = 0;
+    float _rand_chance      = 0;
+    uint8_t _played_idx     = 0;
+    bool _as_played         = false;
     
     uint8_t _note_length    = 0;
     uint8_t _bottom_idx     = 0;

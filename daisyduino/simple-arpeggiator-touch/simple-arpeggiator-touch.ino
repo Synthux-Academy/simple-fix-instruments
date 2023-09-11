@@ -47,13 +47,11 @@ void OnTerminalNoteOff(uint8_t num) { arp.NoteOff(num); }
 void OnArpNoteOn(uint8_t num, uint8_t vel) { vox.NoteOn(scale.freqAt(num), vel / 127.f); }
 void OnArpNoteOff(uint8_t num) { vox.NoteOff(); }
 
-bool is_playing = false;
-
 ///////////////////////////////////////////////////////////////
 ///////////////////// AUDIO CALLBACK //////////////////////////
 void AudioCallback(float **in, float **out, size_t size) {
   for (size_t i = 0; i < size; i++) {
-    if (is_playing && metro.Process()) arp.Trigger();
+    if (metro.Process()) arp.Trigger();
     out[0][i] = out[1][i] = vox.Process();
   }
 }
@@ -90,8 +88,6 @@ void setup() {
 ////////////////////////// LOOP ///////////////////////////////
 
 void loop() {
-  is_playing = digitalRead(S30);
-
   auto speed = analogRead(S31) / kKnobMax;
   auto freq = kMinFreq + kFreqRange * speed;
   
@@ -106,4 +102,5 @@ void loop() {
   auto arp_rnd = arp_ctr < .5f ? 2.f * arp_ctr : 2.f * (1.f - arp_ctr);
   arp.SetDirection(arp_dir);
   arp.SetRandChance(arp_rnd);
+  arp.SetAsPlayed(digitalRead(S30));
 }
