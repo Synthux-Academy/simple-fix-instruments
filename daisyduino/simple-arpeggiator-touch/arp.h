@@ -165,9 +165,9 @@ namespace synthux {
 
       // Remove the note from the input_order and 
       // rearrange the latter.
-      for (uint8_t i = 0; i < _size; i++) {
+      for (uint8_t i = 0; i < _size - 1; i++) {
           if (_input_order[i] == idx) {
-              while (i < _size) {
+              while (i < _size - 1) {
                   _input_order[i] = _input_order[i + 1];
                   i++;
               }
