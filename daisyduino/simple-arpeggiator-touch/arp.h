@@ -10,9 +10,22 @@ namespace synthux {
   template<uint8_t note_count, uint8_t ppqn>
   class Arp {
   public:
-    Arp() {
-      _CalculateNoteLength();
-      Clear();
+    Arp():
+      _on_note_on       { nullptr },
+      _on_note_off      { nullptr },
+      _direction        { ArpDirection::fwd },
+      _rand_chance      { 0 },
+      _played_idx       { 0 },
+      _as_played        { false },
+      _note_length      { ppqn / 12 },
+      _max_note_length  { ppqn / 4 + 1 },
+      _bottom_idx       { 0 },
+      _current_idx      { 0 },
+      _pulse_counter    { 0 },
+      _size             { 0 } 
+      {
+        _SetMaxNoteLength();
+        Clear();
     }
 
     void NoteOn(uint8_t num, uint8_t vel) {
@@ -98,12 +111,16 @@ namespace synthux {
       _as_played = value;
     }
 
+    void SetNoteLength(float length) {
+      _note_length = _max_note_length * length;
+    }
+
     void Trigger() {
       // If only a sentinel note is there, i.e. no notes played, do nothing.
       if (_size <= 1) return;
 
       // "Release" last played note
-      if (_pulse_counter == _note_length && _current_idx > 0) {
+      if (_note_length < ppqn / 4 && _pulse_counter == _note_length && _current_idx > 0) {
         _on_note_off(_notes[_current_idx].num);
       }
       
@@ -201,8 +218,8 @@ namespace synthux {
       return (note_idx == 0) ? _notes[note_idx].prev : note_idx;
     }
 
-    void _CalculateNoteLength() {
-      _note_length = ppqn >= 24 ? ppqn / 12 : 0;
+    void _SetMaxNoteLength() {
+      _max_note_length = ppqn / 4;
     }
 
     struct Note {
@@ -216,21 +233,22 @@ namespace synthux {
     static const uint8_t kEmpty    = 0xfe;
     static const uint8_t kUnlinked = 0xfd;
 
-    void(*_on_note_on)(uint8_t num, uint8_t vel)  = nullptr;
-    void(*_on_note_off)(uint8_t num)              = nullptr;
+    void(*_on_note_on)(uint8_t num, uint8_t vel);
+    void(*_on_note_off)(uint8_t num);
 
     Note _notes[note_count + 1];
     uint8_t _input_order[note_count];
 
     ArpDirection _direction = ArpDirection::fwd;
-    float _rand_chance      = 0;
-    uint8_t _played_idx     = 0;
-    bool _as_played         = false;
+    float _rand_chance;
+    uint8_t _played_idx;
+    bool _as_played;
     
-    uint8_t _note_length    = 0;
-    uint8_t _bottom_idx     = 0;
-    uint8_t _current_idx    = 0;
-    uint8_t _pulse_counter  = 0;
-    uint8_t _size           = 0;
+    uint8_t _note_length;
+    uint8_t _max_note_length;
+    uint8_t _bottom_idx;
+    uint8_t _current_idx;
+    uint8_t _pulse_counter;
+    uint8_t _size;
   };
 };

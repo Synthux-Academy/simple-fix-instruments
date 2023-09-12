@@ -9,9 +9,9 @@ using namespace synthux;
 ////////////////////////////////////////////////////////////
 ////////////////////////// CONTROLS ////////////////////////
 
-#define S30 D15 // SWITCH : START / STOP
+#define S30 D15 // SWITCH : ORDERED / AS PLAYED
 #define S31 A1  // KNOB : SPEED
-// #define S32 A2  // KNOB : CHORD
+#define S32 A2  // KNOB : LENGTH
 #define S33 A3  // KNOB : DIRECTION / RANDOM
 
 static const int kAnalogResolution  = 7; //7bits => 0..127
@@ -97,10 +97,12 @@ void loop() {
   
   term.Process();
 
+  auto arp_lgt = analogRead(S32) / kKnobMax;
   auto arp_ctr = analogRead(S33) / kKnobMax;
   auto arp_dir = arp_ctr < .5f ? ArpDirection::fwd : ArpDirection::rev;
   auto arp_rnd = arp_ctr < .5f ? 2.f * arp_ctr : 2.f * (1.f - arp_ctr);
   arp.SetDirection(arp_dir);
   arp.SetRandChance(arp_rnd);
   arp.SetAsPlayed(digitalRead(S30));
+  arp.SetNoteLength(arp_lgt);
 }
