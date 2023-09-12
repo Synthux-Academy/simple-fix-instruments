@@ -96,10 +96,7 @@ namespace synthux {
 
     void Trigger() {
       // If only a sentinel note is there, i.e. no notes played, do nothing.
-      if (_size <= 1) {
-        _current_idx = 0;
-        return;
-      }
+      if (_size <= 1) return;
 
       // "Release" last played note
       if (_pulse_counter == _note_length && _current_idx > 0) {
@@ -148,7 +145,9 @@ namespace synthux {
   private:
     void _RemoveNote(uint8_t idx) {
       // Send note off in polifonic cintext.
-      //_on_note_off(_notes[idx].num);
+      _on_note_off(_notes[idx].num);
+
+      if (idx == _current_idx) _current_idx = _PrevNoteIdx();
 
       // Link next/previous notes to each other,
       // excluding the removed note from the chain.
@@ -163,9 +162,9 @@ namespace synthux {
 
       // Remove the note from the input_order and 
       // rearrange the latter.
-      for (uint8_t i = 0; i < _size; i++) {
+      for (uint8_t i = 0; i < _size - 1; i++) {
           if (_input_order[i] == idx) {
-              while (i < _size) {
+              while (i < _size - 1) {
                   _input_order[i] = _input_order[i + 1];
                   i++;
               }
