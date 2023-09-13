@@ -20,7 +20,7 @@ static const float kKnobMax = powf(2.f, kAnalogResolution) - 1.f;
 ////////////////////////////////////////////////////////////
 ///////////////////// MODULES //////////////////////////////
 
-static const uint8_t kNotesCount = 32;
+static const uint8_t kNotesCount = 8;
 static const uint8_t kPPQN = 24;
 
 static Scale scale;
