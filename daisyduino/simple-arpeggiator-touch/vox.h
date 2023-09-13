@@ -14,7 +14,7 @@ void Init(float sample_rate) {
   // LFO SETUP
   _lfo.Init(sample_rate);
   _lfo.SetFreq(random(50, 150) / 10.f);
-  _lfo.SetWaveform(Oscillator::WAVE_SIN);
+  _lfo.SetWaveform(Oscillator::WAVE_TRI);
   _lfo.SetAmp(0.005);
 
   //ENV SETUP
