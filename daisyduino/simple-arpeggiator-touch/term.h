@@ -47,49 +47,36 @@ namespace synthux {
       }
 
       void Process() {
-          uint16_t p;
+          uint16_t pin;
           bool is_touched;
           bool was_touched;
           auto state = _cap.touched();
 
-          //Latch on/off
-          //Pin 8
-          is_touched = state & kLatchPin;
-          was_touched = _state & kLatchPin;
-          if (is_touched && !was_touched) {
-            _latch = !_latch;
-            if (!_latch) {
-              for (uint16_t i = 0; i < _hold.size(); i++) {
-                if (_hold[i] && !(state & 1 << i)) _on_note_off(i);
+          for (uint16_t i = 0; i < 12; i++) {
+            pin = 1 << i;
+            is_touched = state & pin;
+            was_touched = _state & pin;
+
+            //On touch 
+            if (is_touched && !was_touched) {
+              //Notes pins 0-7
+              if (i < kNotesCount) {
+                if (_latch && _hold[i]) _SetOff(i); 
+                else _SetOn(i);  
+                continue;
               }
-              _hold.fill(false);
+              //Latch pin 8
+              if (i == 8) {
+                _latch = !_latch;
+                if (!_latch) _SetAllOff(state);
+                continue;    
+              }
+              
+              //Scale select pin 9-11
+              if (i > 8) _on_scale_select(i - 9);
             }
-          }
-
-          //Notes on/off
-          //Pins 0 - 7
-          for (uint16_t i = 0; i < kNotesCount; i++) {
-            p = 1 << i;
-            is_touched = state & p;
-            was_touched = _state & p;
-            if (is_touched && !was_touched) {
-              if (_latch && _hold[i]) _SetOff(i);
-              else _SetOn(i);
-            }
-            else if (!is_touched && was_touched) {
-              if (!_latch) _SetOff(i);
-            }
-          }
-
-          //Scale select
-          //Pins 9, 10, 11
-          for (uint16_t i = 9; i < 12; i++) {
-            p = 1 << i;
-            is_touched = state & p;
-            was_touched = _state & p;
-            if (is_touched && !was_touched) {
-              _on_scale_select(i - 9);
-            }
+            //On release
+            else if (!_latch && !is_touched && was_touched) _SetOff(i);
           }
 
           _state = state;
@@ -106,15 +93,20 @@ namespace synthux {
         _hold[i] = false;
       }
 
+      void _SetAllOff(uint16_t state) {
+        for (uint16_t i = 0; i < _hold.size(); i++) {
+          if (_hold[i] && !(state & 1 << i)) _on_note_off(i);
+        }
+        _hold.fill(false);
+      }
+
       void(*_on_note_on)(uint8_t num, uint8_t vel);
       void(*_on_note_off)(uint8_t num);
       void(*_on_scale_select)(uint8_t index);
 
-      static constexpr uint16_t kLatchPin = 1 << 8;
-
       Adafruit_MPR121 _cap;
-      uint16_t _state { 0 };
+      uint16_t _state;
       std::array<bool, kNotesCount> _hold;
-      bool _latch { false };
+      bool _latch;
   };
 };
