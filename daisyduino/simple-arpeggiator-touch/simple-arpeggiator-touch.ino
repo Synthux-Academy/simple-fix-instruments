@@ -20,8 +20,7 @@ static const float kKnobMax = powf(2.f, kAnalogResolution) - 1.f;
 ////////////////////////////////////////////////////////////
 ///////////////////// MODULES //////////////////////////////
 
-static const uint8_t kNotesCount = 12;
-static const uint8_t kScaleSize = 36;
+static const uint8_t kNotesCount = 32;
 static const uint8_t kPPQN = 24;
 
 static Scale scale;
@@ -42,9 +41,10 @@ static const float kFreqRange = kPPQN * kBPMRange / kSecPerMin;
 ////////////////////////////////////////////////////////////
 ///////////////////// CALLBACKS ////////////////////////////
 
+void OnScaleSelect(uint8_t index) { scale.SetScaleIndex(index); }
 void OnTerminalNoteOn(uint8_t num, uint8_t vel) { arp.NoteOn(num, vel); }
 void OnTerminalNoteOff(uint8_t num) { arp.NoteOff(num); }
-void OnArpNoteOn(uint8_t num, uint8_t vel) { vox.NoteOn(scale.freqAt(num), vel / 127.f); }
+void OnArpNoteOn(uint8_t num, uint8_t vel) { vox.NoteOn(scale.FreqAt(num), vel / 127.f); }
 void OnArpNoteOff(uint8_t num) { vox.NoteOff(); }
 
 ///////////////////////////////////////////////////////////////
@@ -63,8 +63,6 @@ void setup() {
   DAISY.init(DAISY_SEED, AUDIO_SR_48K);
   auto sample_rate = DAISY.get_samplerate();
 
-  Serial.begin(9600);
-
   vox.Init(sample_rate);
 
   metro.Init(48, sample_rate); //48Hz = 24ppqn @ 120bpm 
@@ -72,6 +70,7 @@ void setup() {
   term.Init();
   term.SetOnNoteOn(OnTerminalNoteOn);
   term.SetOnNoteOff(OnTerminalNoteOff);
+  term.SetOnScaleSelect(OnScaleSelect);
 
   arp.SetOnNoteOn(OnArpNoteOn);
   arp.SetOnNoteOff(OnArpNoteOff);

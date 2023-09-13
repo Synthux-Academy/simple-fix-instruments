@@ -38,6 +38,10 @@ namespace synthux {
         _on_note_off = on_note_off;
       }
 
+      void SetOnScaleSelect(void(*on_scale_select)(uint8_t num)) {
+        _on_scale_select = on_scale_select;
+      }
+
       bool IsLatched() {
         return _latch;
       }
@@ -49,6 +53,7 @@ namespace synthux {
           auto state = _cap.touched();
 
           //Latch on/off
+          //Pin 8
           is_touched = state & kLatchPin;
           was_touched = _state & kLatchPin;
           if (is_touched && !was_touched) {
@@ -62,6 +67,7 @@ namespace synthux {
           }
 
           //Notes on/off
+          //Pins 0 - 7
           for (uint16_t i = 0; i < kNotesCount; i++) {
             p = 1 << i;
             is_touched = state & p;
@@ -72,6 +78,17 @@ namespace synthux {
             }
             else if (!is_touched && was_touched) {
               if (!_latch) _SetOff(i);
+            }
+          }
+
+          //Scale select
+          //Pins 9, 10, 11
+          for (uint16_t i = 9; i < 12; i++) {
+            p = 1 << i;
+            is_touched = state & p;
+            was_touched = _state & p;
+            if (is_touched && !was_touched) {
+              _on_scale_select(i - 9);
             }
           }
 
@@ -91,6 +108,7 @@ namespace synthux {
 
       void(*_on_note_on)(uint8_t num, uint8_t vel);
       void(*_on_note_off)(uint8_t num);
+      void(*_on_scale_select)(uint8_t index);
 
       static constexpr uint16_t kLatchPin = 1 << 8;
 
