@@ -104,4 +104,6 @@ void loop() {
   arp.SetRandChance(arp_rnd);
   arp.SetAsPlayed(digitalRead(S30));
   arp.SetNoteLength(arp_lgt);
+
+  delay(4);
 }
