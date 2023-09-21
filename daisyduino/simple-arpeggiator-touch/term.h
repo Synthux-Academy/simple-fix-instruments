@@ -19,6 +19,10 @@ namespace synthux {
         }
 
       void Init() {
+        // Uncomment if you want to use i2C4
+        // Wire.setSCL(D13);
+        // Wire.setSDA(D14);
+        
         if (!_cap.begin(0x5A)) {
           Serial.println("MPR121 not found, check wiring?");
           while (1) {
