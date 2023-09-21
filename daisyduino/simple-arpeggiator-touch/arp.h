@@ -80,7 +80,7 @@ namespace synthux {
       // container of the notes list is plain array so we can 
       // just for-loop through it.
       uint8_t idx = 0;
-      for (uint8_t i = 0; i < note_count; i++) {
+      for (uint8_t i = 0; i < note_count + 1; i++) {
         if (_notes[i].num == num) {
             idx = i;
             break;
