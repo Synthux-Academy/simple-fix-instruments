@@ -86,7 +86,7 @@ void AudioCallback(float **in, float **out, size_t size) {
         }
       }
     }
-    if (is_playing) output = bd.Process(bd_trig) + sd.Process(sd_trig) * 0.6 + hh.Process(hh_trig) * 0.5 + clck.Process(clck_trig);
+    if (is_playing) output = bd.Process(bd_trig) + sd.Process(sd_trig) * 0.6 + hh.Process(hh_trig) * 0.5 + clck.Process(clck_trig) * 0.7;
     clck_trig = false;    
     out[0][i] = out[1][i] = output;
   }

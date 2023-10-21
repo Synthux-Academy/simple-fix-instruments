@@ -18,6 +18,7 @@ public:
   }
 
   float Process(bool trigger) {
+    if (trigger) _osc.Reset();
     auto amp = _env.Process(trigger);
     _noise.SetAmp(amp);
     _osc.SetAmp(amp * 0.5);
