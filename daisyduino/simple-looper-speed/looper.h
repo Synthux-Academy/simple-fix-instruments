@@ -1,117 +1,79 @@
 #pragma once
 
+#include "buf.h"
+#include "win.h"
+#include <array>
+
 namespace synthux {
 
+template<size_t win_slope = 480>
 class Looper {
   public:
+    Looper():
+    _delta           { 1.f },
+    _buffer_length   { 0 },
+    _loop_start      { 0 },
+    _loop_length     { 0 }
+    {}
+
     void Init(float *buf, size_t length) {
-      _buffer = buf;
-      _buffer_length = length;
-      // Reset buffer contents to zero
-      memset(_buffer, 0, sizeof(float) * _buffer_length);
+        _buffer.Init(buf, length, win_slope);
+        _loop_length = length;
+        _Activate(0);
     }
 
     void SetRecording(bool is_rec_on) {
-        //Initialize recording head position on start
-        if (_rec_env_pos_inc <= 0 && is_rec_on) {
-            _rec_head = (_loop_start + static_cast<int>(_play_head)) % _buffer_length; 
-            _is_empty = false;
-        }
-        // When record switch changes state it effectively
-        // sets ramp to rising/falling, providing a
-        // fade in/out in the beginning and at the end of 
-        // the recorded region.
-        _rec_env_pos_inc = is_rec_on ? 1 : -1;
+        _buffer.SetRecording(is_rec_on);
     }
 
     void SetSpeed(const float value) {
-      _play_head_delta = value;
+        _delta = value;
     }
 
-    void SetLoop(const float loop_length) {
-      // Set the start of the next loop
-      _pending_loop_start = 0;
-
-      // If the current loop start is not set yet, set it too
-      if (!_is_loop_set) _loop_start = _pending_loop_start;
-
-      // Set the length of the next loop
-      _pending_loop_length = max(kMinLoopLength, static_cast<size_t>(loop_length * _buffer_length));
-
-      //If the current loop length is not set yet, set it too
-      if (!_is_loop_set) _loop_length = _pending_loop_length;
-      _is_loop_set = true;
+    void SetLoop(const float loop_start, const float loop_length) {
+        _loop_start = loop_start;
+        _loop_length = loop_length;
     }
   
     float Process(float in) {
-      // Calculate iterator position on the record level ramp.
-      if (_rec_env_pos_inc > 0 && _rec_env_pos < kFadeLength
-       || _rec_env_pos_inc < 0 && _rec_env_pos > 0) {
-          _rec_env_pos += _rec_env_pos_inc;
-      }
-      // If we're in the middle of the ramp - record to the buffer.
-      if (_rec_env_pos > 0) {
-        // Calculate fade in/out
-        float rec_attenuation = static_cast<float>(_rec_env_pos) / static_cast<float>(kFadeLength);
-        _buffer[_rec_head] = in * rec_attenuation + _buffer[_rec_head] * (1.f - rec_attenuation);
-        if (++_rec_head == _buffer_length) _rec_head = 0;
-      }
-      
-      if (_is_empty) {
-        return 0;
-      }
+        _buffer.Write(in);
+        float output = 0;
+//        for (auto& w: _wins) {
+//            if (w.IsHalf()) _Activate(w.PlayHead());
+//        }
 
-      // Playback from the buffer
-      float attenuation = 1;
-      float output = 0;
-      //Calculate fade in/out
-      if (_play_head < kFadeLength) {
-        attenuation = static_cast<float>(_play_head) / static_cast<float>(kFadeLength);
-      }
-      else if (_play_head >= _loop_length - kFadeLength) {
-        attenuation = static_cast<float>(_loop_length - _play_head) / static_cast<float>(kFadeLength);
-      }
-      
-      // Read from the buffer
-      auto _int_ph = static_cast<uint32_t>(_play_head);
-      auto _frac_ph = _play_head - _int_ph;
-      auto _next_ph = (_int_ph + 1);
-      auto _loop_end = _loop_length - 1; 
-      if (_next_ph < 0) _next_ph += _loop_end;
-      if (_next_ph > _loop_end) _next_ph -= _loop_end;
-      output = _buffer[_int_ph] + _frac_ph * (_buffer[_next_ph] - _buffer[_int_ph]);
-      _play_head += _play_head_delta;
-      if (_play_head < 0) {
-        _play_head += _loop_end;
-        _loop_length = _pending_loop_length;
-      } 
-      else if (_play_head > _loop_end) {
-        _play_head -= _loop_end;
-        _loop_length = _pending_loop_length;
-      }
-      
-      return output * attenuation;
+        for (auto& w: _wins) {
+            if (w.IsActive()) {
+                auto w_out = w.Process(_buffer);
+                output += w_out;
+                std::cout << w_out << " ";
+            }
+        }
+        std::cout << " --> " << output << std::endl;
+        return output;
     }
 
-  private:
-    static const size_t kFadeLength = 600;
-    static const size_t kMinLoopLength = 2 * kFadeLength;
+private:
+    void _Activate(float start) {
+//        for (auto& w: _wins) {
+        for (int i = 0; i < _wins.size(); i++) {
+            auto& w = _wins[i];
+            if (!w.IsActive()) {
+                w.Activate(start, _delta, _loop_start, _loop_length);
+                std::cout << "A" << i << ">" << start << " ";
+                break;
+            }
+        }
+    }
 
-    float* _buffer;
+    static const size_t kMinLoopLength = 2 * win_slope;
 
-    size_t _buffer_length       = 0;
-    size_t _loop_length         = 0;
-    size_t _pending_loop_length = 0;
-    size_t _loop_start          = 0;
-    size_t _pending_loop_start  = 0;
+    Buffer _buffer;
+    std::array<Window<win_slope>, 4> _wins;
 
-    float _play_head = 0;
-    float _play_head_delta = 0;
-    size_t _rec_head  = 0;
-
-    size_t _rec_env_pos      = 0;
-    int32_t _rec_env_pos_inc = 0;
-    bool _is_empty  = true;
-    bool _is_loop_set = false;
+    float _delta;
+    size_t _buffer_length;
+    size_t _loop_start;
+    size_t _loop_length;
 };
 };

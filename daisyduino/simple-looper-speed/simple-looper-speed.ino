@@ -56,28 +56,21 @@ void loop() {
   // }
   // looper.SetSpeed(loop_speed);
 
-  auto loop_length = fmap(analogRead(loop_length_pin) / kKnobMax, 0.f, 1.f, Mapping::EXP);
+  auto loop_start = fmap(analogRead(loop_start_pin) / kKnobMax, 0.f, 1.f);
   looper.SetLoop(loop_length);
+
+  auto loop_length = fmap(analogRead(loop_length_pin) / kKnobMax, 0.f, 1.f, Mapping::EXP);
+  looper.SetLoop(loop_start, loop_length);
 
   // Toggle record
   auto record_on = !digitalRead(record_pin);
   looper.SetRecording(record_on);
 
-  auto mod_freq = fmap(analogRead(loop_speed_pin) / kKnobMax, 5.f, 100.0f);
-  mod.SetFreq(mod_freq);
+  // auto mod_freq = fmap(analogRead(loop_speed_pin) / kKnobMax, 5.f, 100.0f);
+  // mod.SetFreq(mod_freq);
 
-  // Set pitch
-  mod_val = fmap(analogRead(mod_pin) / kKnobMax, 0.f, 1.0f);
+  // // Set pitch
+  // mod_val = fmap(analogRead(mod_pin) / kKnobMax, 0.f, 1.0f);
 
   delay(4);
 }
-
-// void set_pitch(float pitch_val) {
-//   int pitch = 0;
-//   // Allow some gap in the middle of the knob turn so 
-//   // it's easy to cacth zero position
-//   if (pitch_val < 0.45 || pitch_val > 0.55) {
-//     pitch = 12.0 * (pitch_val - 0.5);
-//   }
-//   pitch_shifter.SetTransposition(pitch);
-// }
