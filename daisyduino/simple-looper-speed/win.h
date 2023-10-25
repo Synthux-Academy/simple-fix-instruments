@@ -31,6 +31,10 @@ public:
 
     float PlayHead() { return _play_head; }
 
+    float LoopStart() { return _loop_start; }
+
+    float LoopLength() { return _loop_length; }
+
     float Process(Buffer& buf) {
         auto int_ph = static_cast<size_t>(_play_head);
         auto frac_ph = _play_head - int_ph;
