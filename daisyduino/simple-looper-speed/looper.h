@@ -11,7 +11,6 @@ class Looper {
   public:
     Looper():
     _delta           { 1.f },
-    _buffer_length   { 0 },
     _loop_start      { 0 },
     _loop_length     { 0 }
     {}
@@ -76,7 +75,6 @@ private:
     std::array<Window<win_slope>, 4> _wins;
 
     float _delta;
-    size_t _buffer_length;
     size_t _loop_start;
     size_t _loop_length;
 };
