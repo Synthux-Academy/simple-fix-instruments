@@ -30,8 +30,11 @@ class Looper {
     }
 
     void SetLoop(const float loop_start, const float loop_length) {
-        _loop_start = loop_start;
-        _loop_length = loop_length;
+      auto new_start = static_cast<size_t>(loop_start * _buffer.Length());
+      if (abs(static_cast<int32_t>(new_start) - static_cast<int32_t>(_loop_start)) > 500) _loop_start = new_start;
+      
+      auto new_length = static_cast<size_t>(loop_length * _buffer.Length());
+      if (abs(static_cast<int32_t>(new_length) - static_cast<int32_t>(_loop_length)) > 1200) _loop_length = new_length;
     }
   
     float Process(float in) {
