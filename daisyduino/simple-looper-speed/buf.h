@@ -12,6 +12,10 @@ class Buffer {
       memset(_buffer, 0, sizeof(float) * length);
     }
 
+    size_t Length() {
+      return _buffer_length;
+    }
+
     void SetRecording(bool is_rec_on) {
         //Initialize recording head position on start
         if (_rec_env_pos_inc <= 0 && is_rec_on) {
