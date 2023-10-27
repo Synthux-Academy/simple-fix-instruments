@@ -4,7 +4,7 @@
 
 // Setup pins
 static const int record_pin      = D(S35);
-static const int loop_speed_pin  = A(S33);
+static const int loop_start_pin  = A(S33);
 static const int loop_length_pin = A(S34);
 static const int mod_pin         = A(S30);
 
@@ -57,8 +57,6 @@ void loop() {
   // looper.SetSpeed(loop_speed);
 
   auto loop_start = fmap(analogRead(loop_start_pin) / kKnobMax, 0.f, 1.f);
-  looper.SetLoop(loop_length);
-
   auto loop_length = fmap(analogRead(loop_length_pin) / kKnobMax, 0.f, 1.f, Mapping::EXP);
   looper.SetLoop(loop_start, loop_length);
 
