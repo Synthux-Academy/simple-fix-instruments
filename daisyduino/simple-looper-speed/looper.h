@@ -39,6 +39,8 @@ class Looper {
   
     float Process(float in) {
         _buffer.Write(in);
+        if (_buffer.IsRecording()) return in;
+
         float output = 0;
         for (auto& w: _wins) {
             if (w.IsHalf()) _Activate(w.PlayHead(), w.LoopStart(), w.LoopLength());

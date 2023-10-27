@@ -29,6 +29,10 @@ class Buffer {
         _rec_env_pos_inc = is_rec_on ? 1 : -1;
     }
   
+    bool IsRecording() {
+      return _rec_env_pos > 0;
+    }
+
     float Read(size_t frame) {
       if (frame >= _buffer_length) frame -= _buffer_length;
       return _buffer[frame];
@@ -41,7 +45,7 @@ class Buffer {
           _rec_env_pos += _rec_env_pos_inc;
       }
       // If we're in the middle of the ramp - record to the buffer.
-      if (_rec_env_pos > 0) {
+      if (IsRecording()) {
         // Calculate fade in/out
         float rec_attenuation = static_cast<float>(_rec_env_pos - 1) / static_cast<float>(_env_slope - 1);
         _buffer[_rec_head] = in * rec_attenuation + _buffer[_rec_head] * (1.f - rec_attenuation);
