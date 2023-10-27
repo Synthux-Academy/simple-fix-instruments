@@ -47,8 +47,6 @@ public:
         auto sample_b = buf.Read(next_ph + _loop_start);
         auto att = _Attenuation();
         auto output = (sample_a + frac_ph * (sample_b - sample_a)) * att;
-        
-        std::cout << "I" << _iterator << "P" << int_ph + _loop_start << " ";
 
         _Advance();
 
@@ -57,8 +55,8 @@ public:
   
 private:
     float _Attenuation() {
-        if (_iterator < kHalf) return static_cast<float>(_iterator) * kSlope;
-        else return 1 - static_cast<float>(_iterator - kHalf) * kSlope;
+      if (_iterator < kHalf) return static_cast<float>(_iterator) * kSlope;// * loop_att;
+      else return 1 - static_cast<float>(_iterator - kHalf) * kSlope;// * loop_att;
     }
   
     void _Advance() {

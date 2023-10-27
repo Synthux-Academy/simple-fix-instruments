@@ -42,33 +42,21 @@ class Looper {
         if (_buffer.IsRecording()) return in;
 
         float output = 0;
-        for (auto& w: _wins) {
-            if (w.IsHalf()) _Activate(w.PlayHead(), w.LoopStart(), w.LoopLength());
-        }
 
-        for (auto& w: _wins) {
-            if (w.IsActive()) {
-                auto w_out = w.Process(_buffer);
-                output += w_out;
-                std::cout << w_out << " ";
-            }
-        }
-        std::cout << " --> " << output << std::endl;
+        for (auto& w: _wins)
+            if (w.IsHalf()) _Activate(w.PlayHead(), w.LoopStart(), w.LoopLength());
+
+        for (auto& w: _wins)
+            if (w.IsActive()) output += w.Process(_buffer);
+        
         return output;
     }
 
 private:
     void _Activate(float start, const size_t loop_start, const size_t loop_length) {
-        if (loop_start != _loop_start || loop_length < _loop_length) {
-            start = _loop_start;
-        }
-
-//        for (auto& w: _wins) {
-        for (int i = 0; i < _wins.size(); i++) {
-            auto& w = _wins[i];
+       for (auto& w: _wins) {
             if (!w.IsActive()) {
                 w.Activate(start, _delta, _loop_start, _loop_length);
-                std::cout << "A" << i << ">" << start << " ";
                 break;
             }
         }
