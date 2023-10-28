@@ -6,7 +6,7 @@
 
 namespace synthux {
 
-template<size_t win_slope = 480>
+template<size_t win_slope = 600>
 class Looper {
   public:
     Looper():
