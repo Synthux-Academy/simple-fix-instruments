@@ -6,7 +6,7 @@
 
 namespace synthux {
 
-template<size_t win_slope = 600>
+template<size_t win_slope = 480>
 class Looper {
   public:
     Looper():
@@ -36,8 +36,8 @@ class Looper {
       auto new_length = static_cast<size_t>(loop_length * _buffer.Length());
       auto norm_length = (new_length / win_slope) * win_slope;
       if (new_length - norm_length > win_slope / 2) norm_length += win_slope;
-      if (abs(static_cast<int32_t>(norm_length) - static_cast<int32_t>(_loop_length) > win_slope)) {
-        _loop_length = max(2 * win_slope, norm_length);
+      if (abs(static_cast<int32_t>(norm_length) - static_cast<int32_t>(_loop_length)) > win_slope) {
+        _loop_length = std::max(2 * win_slope, norm_length);
       }
     }
   

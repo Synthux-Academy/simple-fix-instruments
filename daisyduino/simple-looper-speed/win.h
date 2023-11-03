@@ -1,6 +1,14 @@
 #pragma once
+#include <array>
 
 namespace synthux {
+
+template<size_t length>
+constexpr std::array<float, length> Slope() {
+    std::array<float, length> slope { 0 };
+    for (int i = 0; i < length; i++) slope[i] = static_cast<float>(i) / static_cast<float>(length - 1);
+    return slope;
+}
 
 template<size_t win_slope>
 class Window {
@@ -51,8 +59,8 @@ public:
   
 private:
     float _Attenuation() {
-      if (_iterator < kHalf) return static_cast<float>(_iterator) * kSlope;// * loop_att;
-      else return 1 - static_cast<float>(_iterator - kHalf) * kSlope;// * loop_att;
+      auto idx = (_iterator < kHalf) ? _iterator : kSize - _iterator - 1;
+      return kSlope[idx];
     }
   
     void _Advance() {
@@ -62,9 +70,9 @@ private:
         if (++_iterator == kSize) _is_active = false;
     }
 
-    const size_t kHalf { win_slope };
-    const size_t kSize { 2 * win_slope };
-    const float kSlope { 1.f / static_cast<float>(win_slope - 1) };
+    static constexpr size_t kHalf { win_slope };
+    static constexpr size_t kSize { 2 * win_slope };
+    static constexpr std::array<float, win_slope> kSlope { Slope<win_slope>() };
 
     float _play_head;
     float _delta;
