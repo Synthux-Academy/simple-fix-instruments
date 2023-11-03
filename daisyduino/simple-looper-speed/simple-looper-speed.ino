@@ -49,10 +49,9 @@ void loop() {
   auto raw_loop_speed = analogRead(loop_speed_pin); 
   auto loop_speed = 0.f;
   if (raw_loop_speed < 500 || raw_loop_speed > 524) {
-    loop_speed = fmap(raw_loop_speed / kKnobMax, -2.f, 2.f);
+    loop_speed = fmap(raw_loop_speed / kKnobMax, -1.f, 1.f);
   }
-  looper.SetSpeed(loop_speed);
-  // Serial.println(loop_speed);
+  looper.SetSpeed(1.f + loop_speed);
 
   auto loop_start = fmap(analogRead(loop_start_pin) / kKnobMax, 0.f, 1.f);
   auto loop_length = fmap(analogRead(loop_length_pin) / kKnobMax, 0.f, 1.f, Mapping::EXP);
