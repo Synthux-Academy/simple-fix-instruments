@@ -14,7 +14,9 @@ static const float kKnobMax = 1023;
 static const uint32_t kBufferLengthSec = 5;
 static const uint32_t kSampleRate = 48000;
 static const size_t kBufferLenghtSamples = kBufferLengthSec * kSampleRate;
-static float DSY_SDRAM_BSS buffer[kBufferLenghtSamples];
+static float DSY_SDRAM_BSS buffer0[kBufferLenghtSamples];
+static float DSY_SDRAM_BSS buffer1[kBufferLenghtSamples];
+static float* buffer[2] = { buffer0, buffer1 };
 
 static synthux::Looper looper;
 static Oscillator mod;
@@ -22,10 +24,7 @@ static Oscillator mod;
 float mod_val = 0;
 
 void AudioCallback(float **in, float **out, size_t size) {
-  for (size_t i = 0; i < size; i++) {
-    auto looper_out = looper.Process(in[1][i]);
-    out[0][i] = out[1][i] = looper_out;
-  }
+  for (size_t i = 0; i < size; i++) looper.Process(in[0][i], in[1][i], out[0][i], out[1][i]);
 }
 
 void setup() {

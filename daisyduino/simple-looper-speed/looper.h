@@ -15,7 +15,7 @@ class Looper {
     _loop_length     { 0 }
     {}
 
-    void Init(float *buf, size_t length) {
+    void Init(float **buf, size_t length) {
         _buffer.Init(buf, length, win_slope);
         _loop_length = length;
         _Activate(0);
@@ -41,19 +41,27 @@ class Looper {
       }
     }
   
-    float Process(float in) {
-        _buffer.Write(in);
-        if (_buffer.IsRecording()) return in;
-
-        float output = 0;
+    void Process(float& in0, float& in1, float& out0, float& out1) {
+        _buffer.Write(in0, in1);
+        if (_buffer.IsRecording()) {
+          out0 = in0;
+          out1 = in1;
+        };
 
         for (auto& w: _wins)
             if (w.IsHalf()) _Activate(w.PlayHead());
 
-        for (auto& w: _wins)
-            if (w.IsActive()) output += w.Process(_buffer);
-        
-        return output;
+        out0 = 0.f;
+        out1 = 0.f;
+        for (auto& w: _wins) {
+            if (!w.IsActive()) continue;
+            
+            auto w_out0 = 0.f;
+            auto w_out1 = 0.f;
+            w.Process(_buffer, w_out0, w_out1);
+            out0 += w_out0;
+            out1 += w_out1;
+        }
     }
 
 private:

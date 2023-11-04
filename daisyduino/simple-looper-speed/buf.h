@@ -4,12 +4,13 @@ namespace synthux {
 
 class Buffer {
   public:
-    void Init(float *buf, size_t length, size_t env_slope = 480) {
+    void Init(float **buf, size_t length, size_t env_slope = 480) {
       _buffer = buf;
       _buffer_length = length;
       _env_slope = env_slope;
       // Reset buffer contents to zero
-      memset(_buffer, 0, sizeof(float) * length);
+      memset(_buffer[0], 0, sizeof(float) * length);
+      memset(_buffer[1], 0, sizeof(float) * length);
     }
 
     size_t Length() {
@@ -33,12 +34,13 @@ class Buffer {
       return _rec_env_pos > 0;
     }
 
-    float Read(size_t frame) {
+    void Read(size_t frame, float& out0, float& out1) {
       if (frame >= _buffer_length) frame -= _buffer_length;
-      return _buffer[frame];
+      out0 = _buffer[0][frame];
+      out1 = _buffer[1][frame];
     }
 
-    void Write(float in) {
+    void Write(float& in0, float& in1) {
       // Calculate iterator position on the record level ramp.
       if ((_rec_env_pos_inc > 0 && _rec_env_pos < _env_slope)
        || (_rec_env_pos_inc < 0 && _rec_env_pos > 0)) {
@@ -48,13 +50,14 @@ class Buffer {
       if (IsRecording()) {
         // Calculate fade in/out
         float rec_attenuation = static_cast<float>(_rec_env_pos - 1) / static_cast<float>(_env_slope - 1);
-        _buffer[_rec_head] = in * rec_attenuation + _buffer[_rec_head] * (1.f - rec_attenuation);
+        _buffer[0][_rec_head] = in0 * rec_attenuation + _buffer[0][_rec_head] * (1.f - rec_attenuation);
+        _buffer[1][_rec_head] = in1 * rec_attenuation + _buffer[1][_rec_head] * (1.f - rec_attenuation);
         if (++_rec_head == _buffer_length) _rec_head = 0;
       }
     }
 
   private:
-    float* _buffer;
+    float** _buffer;
     
     size_t  _buffer_length      { 0 };
     size_t  _loop_length        { 0 };

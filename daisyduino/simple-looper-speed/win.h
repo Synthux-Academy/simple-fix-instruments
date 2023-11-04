@@ -39,7 +39,7 @@ public:
 
     float PlayHead() { return _play_head; }
 
-    float Process(Buffer& buf) {
+    void Process(Buffer& buf, float& out0, float& out1) {
         auto int_ph = static_cast<size_t>(_play_head);
         auto frac_ph = _play_head - int_ph;
         auto next_ph = int_ph + 1;
@@ -47,14 +47,18 @@ public:
         if (next_ph < 0) next_ph += _loop_length;
         if (next_ph >= _loop_length) next_ph -= _loop_length;
 
-        auto sample_a = buf.Read(int_ph + _loop_start);
-        auto sample_b = buf.Read(next_ph + _loop_start);
+        auto a0 = 0.f;
+        auto a1 = 0.f;
+        auto b0 = 0.f;
+        auto b1 = 0.f;
+        buf.Read(int_ph + _loop_start, a0, a1);
+        buf.Read(next_ph + _loop_start, b0, b1);
+        
         auto att = _Attenuation();
-        auto output = (sample_a + frac_ph * (sample_b - sample_a)) * att;
+        out0 = (a0 + frac_ph * (b0 - a0)) * att;
+        out1 = (a1 + frac_ph * (b1 - a1)) * att;
 
         _Advance();
-
-        return output;
     }
   
 private:
