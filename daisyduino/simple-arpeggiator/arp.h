@@ -104,7 +104,7 @@ namespace synthux {
       }
       
       // We trigger on every 1/16th
-      if (_pulse_counter++ < ppqn / 4) return;
+      if (++_pulse_counter < ppqn / 4) return;
       _pulse_counter = 0;
 
       // Take next or previous note depending on direction
@@ -140,6 +140,7 @@ namespace synthux {
           _notes[i].next = kUnlinked;
           _notes[i].prev = kUnlinked;
       }
+      _pulse_counter = ppqn / 4;
     }
 
   private:
